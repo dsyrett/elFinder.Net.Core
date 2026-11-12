@@ -1,15 +1,11 @@
-﻿using SixLabors.ImageSharp;
+﻿using SkiaSharp;
 
-namespace elFinder.Net.Core.Models.Response
-{
-    public class DimResponse
-    {
-        public DimResponse()
-        {
+namespace elFinder.Net.Core.Models.Response {
+    public class DimResponse {
+        public DimResponse() {
         }
 
-        public DimResponse(Size size)
-        {
+        public DimResponse(SKSizeI size) {
             dim = $"{size.Width}x{size.Height}";
         }
 

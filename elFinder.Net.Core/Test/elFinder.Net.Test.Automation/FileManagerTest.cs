@@ -1,55 +1,46 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace elFinder.Net.Test.Automation
-{
-    public class FileManagerTest : IDisposable
-    {
+namespace elFinder.Net.Test.Automation {
+    public class FileManagerTest : IDisposable {
         private readonly IWebDriver _driver;
         private readonly string _fileManagerUrl;
         private bool disposedValue;
 
-        public FileManagerTest(IWebDriver driver, string fileManagerUrl)
-        {
+        public FileManagerTest(IWebDriver driver, string fileManagerUrl) {
             _driver = driver;
             _fileManagerUrl = fileManagerUrl;
         }
 
-        public Task<bool> LoadSuccessAsync()
-        {
+        public Task<bool> LoadSuccessAsync() {
             _driver.Navigate().GoToUrl(_fileManagerUrl);
 
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
 
-            var loaded = wait.Until(webDriver =>
-            {
+            var loaded = wait.Until(webDriver => {
                 return (webDriver as IJavaScriptExecutor)
                     .ExecuteScript("return document.readyState") as string == "complete";
             });
 
-            try
-            {
+            try {
                 var errDialog = _driver.FindElement(
                     By.CssSelector(".elfinder-dialog-error"));
 
                 var isVisible = errDialog.Displayed;
 
                 return Task.FromResult(!isVisible);
-            }
-            catch (NoSuchElementException)
-            {
+            } catch (NoSuchElementException) {
                 return Task.FromResult(true);
             }
         }
 
-        public Task<bool> CreateNewFolderAsync(string folderName)
-        {
+        public Task<bool> CreateNewFolderAsync(string folderName) {
             var elFinder = ElementVisible(".elfinder-cwd-wrapper");
 
             var rightClickElfinder = new Actions(_driver).ContextClick(elFinder);
@@ -76,8 +67,7 @@ namespace elFinder.Net.Test.Automation
             return Task.FromResult(true);
         }
 
-        public Task<bool> RenameAsync(string oldFolderName, string newFolderName)
-        {
+        public Task<bool> RenameAsync(string oldFolderName, string newFolderName) {
             var testFolder = ElementsVisible(".elfinder-cwd-file", filter:
                 ele => ele.GetAttribute("innerHTML").Contains(oldFolderName)).FirstOrDefault();
 
@@ -99,19 +89,15 @@ namespace elFinder.Net.Test.Automation
             clickElfinder.Perform();
             Wait(1);
 
-            try
-            {
+            try {
                 var result = ElementVisible(".elfinder-dialog-error", 1);
                 return Task.FromResult(false);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 return Task.FromResult(true);
             }
         }
 
-        public Task<bool> DeleteFolderAsync(string folderName)
-        {
+        public Task<bool> DeleteFolderAsync(string folderName) {
             var testFolder = ElementsVisible(".elfinder-cwd-file", filter:
                 ele => ele.GetAttribute("innerHTML").Contains(folderName)).FirstOrDefault();
 
@@ -129,34 +115,28 @@ namespace elFinder.Net.Test.Automation
             acceptBtn.Click();
             Wait(1);
 
-            try
-            {
+            try {
                 var result = ElementVisible(".elfinder-dialog-error", 1);
                 return Task.FromResult(false);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 return Task.FromResult(true);
             }
         }
 
-        private void Wait(double sec)
-        {
+        private void Wait(double sec) {
             var calledTime = DateTime.Now;
             var waitSec = TimeSpan.FromSeconds(sec);
             new WebDriverWait(_driver, TimeSpan.FromSeconds(sec + 1))
                 .Until(dv => DateTime.Now - calledTime > waitSec);
         }
 
-        private IWebElement ElementVisible(string cssSelector, double? sec = null)
-        {
-            return ElementWait(sec).Until(ExpectedConditions.ElementIsVisible(By.CssSelector(cssSelector)));
+        private IWebElement ElementVisible(string cssSelector, double? sec = null) {
+            IWebElement element = _driver.FindElement(By.CssSelector(cssSelector));
+            return ElementWait(sec).Until(d => element.Displayed ? element : null);
         }
 
-        private IEnumerable<IWebElement> ElementsVisible(string cssSelector, Func<IWebElement, bool> filter = null, double? sec = null)
-        {
-            return ElementWait(sec).Until(dv =>
-            {
+        private IEnumerable<IWebElement> ElementsVisible(string cssSelector, Func<IWebElement, bool> filter = null, double? sec = null) {
+            return ElementWait(sec).Until(dv => {
                 IEnumerable<IWebElement> elements = dv.FindElements(
                     By.CssSelector(cssSelector)).ToList();
                 if (filter != null) elements = elements.Where(filter);
@@ -164,20 +144,16 @@ namespace elFinder.Net.Test.Automation
             });
         }
 
-        private WebDriverWait ElementWait(double? sec = null)
-        {
+        private WebDriverWait ElementWait(double? sec = null) {
             var wait = new WebDriverWait(_driver, sec.HasValue ? TimeSpan.FromSeconds(sec.Value) : TimeSpan.FromSeconds(5));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             return wait;
         }
 
         #region Dispose
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
+        protected virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
                     // TODO: dispose managed state (managed objects)
                 }
 
@@ -192,14 +168,12 @@ namespace elFinder.Net.Test.Automation
         }
 
         // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        ~FileManagerTest()
-        {
+        ~FileManagerTest() {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);

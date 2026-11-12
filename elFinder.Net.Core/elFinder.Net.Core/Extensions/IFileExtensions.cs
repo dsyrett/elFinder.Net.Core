@@ -2,6 +2,7 @@
 using elFinder.Net.Core.Models.FileInfo;
 using elFinder.Net.Core.Services;
 using elFinder.Net.Core.Services.Drawing;
+
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -9,14 +10,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace elFinder.Net.Core.Extensions
-{
-    public static class IFileExtensions
-    {
+namespace elFinder.Net.Core.Extensions {
+    public static class IFileExtensions {
         private static readonly MD5 _md5 = MD5.Create();
 
-        public static async Task<string> GetFileMd5Async(this IFile file, CancellationToken cancellationToken = default)
-        {
+        public static async Task<string> GetFileMd5Async(this IFile file, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             string fileName = file.Name;
@@ -24,40 +22,33 @@ namespace elFinder.Net.Core.Extensions
 
             fileName += modified.ToFileTimeUtc();
             var bytes = Encoding.UTF8.GetBytes(fileName);
-            return BitConverter.ToString(_md5.ComputeHash(bytes)).Replace("-", string.Empty);
+            return Convert.ToHexString(_md5.ComputeHash(bytes));
         }
 
         public static async Task<BaseInfoResponse> ToFileInfoAsync(this IFile file, string parentHash,
             IVolume volume, IPathParser pathParser, IPictureEditor pictureEditor, IVideoEditor videoEditor,
-            CancellationToken cancellationToken = default)
-        {
+            CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (file == null) throw new ArgumentNullException(nameof(file));
-            if (volume == null) throw new ArgumentNullException(nameof(volume));
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(volume);
 
             var fHash = file.GetHash(volume, pathParser);
             var fileLength = await file.LengthAsync;
 
             FileInfoResponse response;
 
-            if (volume.ThumbnailUrl != null && fileLength > 0 && file.ObjectAttribute.Read)
-            {
-                if (pictureEditor.CanProcessFile(file.Extension))
-                {
+            if (volume.ThumbnailUrl != null && fileLength > 0 && file.ObjectAttribute.Read) {
+                if (pictureEditor.CanProcessFile(file.Extension)) {
                     var imgResponse = new ImageInfoResponse();
                     response = imgResponse;
                     imgResponse.tmb = fHash;
-                }
-                else if (videoEditor.CanProcessFile(file.Extension))
-                {
+                } else if (videoEditor.CanProcessFile(file.Extension)) {
                     var vidResponse = new VideoInfoResponse();
                     response = vidResponse;
                     vidResponse.tmb = fHash;
-                }
-                else response = new FileInfoResponse();
-            }
-            else response = new FileInfoResponse();
+                } else response = new FileInfoResponse();
+            } else response = new FileInfoResponse();
 
             response.read = file.ObjectAttribute.Read == true ? (byte)1 : (byte)0;
             response.write = file.ObjectAttribute.Write == true ? (byte)1 : (byte)0;
@@ -71,21 +62,18 @@ namespace elFinder.Net.Core.Extensions
             return response;
         }
 
-        public static ObjectAttribute GetObjectAttribute(this IFile file, IVolume volume)
-        {
-            var objAttr = new ObjectAttribute(volume.DefaultObjectAttribute);
+        public static ObjectAttribute GetObjectAttribute(this IFile file, IVolume volume) {
+            var objAttr = new ObjectAttribute(volume.DefaultObjectAttribute) {
+                Write = !volume.IsReadOnly,
+                Locked = volume.IsLocked,
+                ShowOnly = volume.IsShowOnly
+            };
 
-            objAttr.Write = !volume.IsReadOnly;
-            objAttr.Locked = volume.IsLocked;
-            objAttr.ShowOnly = volume.IsShowOnly;
-
-            if (volume.ObjectAttributes != null)
-            {
+            if (volume.ObjectAttributes != null) {
                 var attributeFilters = volume.ObjectAttributes.Where(x =>
                     x.FileFilter?.Invoke(file) == true || x.ObjectFilter?.Invoke(file) == true).ToArray();
 
-                foreach (var attr in attributeFilters)
-                {
+                foreach (var attr in attributeFilters) {
                     if (attr.Locked != null) objAttr.Locked = attr.Locked.Value;
                     if (attr.Read != null) objAttr.Read = attr.Read.Value;
                     if (attr.Visible != null) objAttr.Visible = attr.Visible.Value;
@@ -99,8 +87,7 @@ namespace elFinder.Net.Core.Extensions
         }
 
         public static MediaType? CanGetThumb(this IFile file, IPictureEditor pictureEditor, IVideoEditor videoEditor,
-            bool verify = true)
-        {
+            bool verify = true) {
             if (verify && !file.ObjectAttribute.Read) return null;
 
             if (pictureEditor.CanProcessFile(file.Extension))
@@ -112,18 +99,15 @@ namespace elFinder.Net.Core.Extensions
             return null;
         }
 
-        public static bool CanExtract(this IFile file)
-        {
+        public static bool CanExtract(this IFile file) {
             return file.ObjectAttribute.Access;
         }
 
-        public static bool CanEditImage(this IFile file)
-        {
+        public static bool CanEditImage(this IFile file) {
             return file.ObjectAttribute.Read && file.ObjectAttribute.Write;
         }
 
-        public static async Task<bool> CanArchiveToAsync(this IFile destination, CancellationToken cancellationToken = default)
-        {
+        public static async Task<bool> CanArchiveToAsync(this IFile destination, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (await destination.ExistsAsync)

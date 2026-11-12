@@ -5,6 +5,7 @@ using elFinder.Net.Core.Models.Response;
 using elFinder.Net.Core.Models.Result;
 using elFinder.Net.Core.Services;
 using elFinder.Net.Core.Services.Drawing;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,10 +14,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace elFinder.Net.Core
-{
-    public interface IConnector
-    {
+namespace elFinder.Net.Core {
+    public interface IConnector {
         ConnectorOptions Options { get; }
         PluginManager PluginManager { get; }
         IList<IVolume> Volumes { get; set; }
@@ -29,35 +28,32 @@ namespace elFinder.Net.Core
         Task AbortAsync(RequestCommand cmd, CancellationToken cancellationToken = default);
     }
 
-    public class Connector : IConnector
-    {
+    public class Connector : IConnector {
         protected readonly ConnectorOptions options;
         protected readonly PluginManager pluginManager;
         protected readonly IPathParser pathParser;
         protected readonly IConnectorManager connectorManager;
 
         public Connector(ConnectorOptions options, PluginManager pluginManager,
-            IPathParser pathParser, IConnectorManager connectorManager)
-        {
+            IPathParser pathParser, IConnectorManager connectorManager) {
             this.options = options;
             this.pluginManager = pluginManager;
             this.pathParser = pathParser;
             this.connectorManager = connectorManager;
-            Volumes = new List<IVolume>();
+            Volumes = [];
         }
 
         public virtual ConnectorOptions Options => options;
         public virtual IList<IVolume> Volumes { get; set; }
         public virtual PluginManager PluginManager => pluginManager;
 
-        public virtual async Task<ConnectorResult> ProcessAsync(ConnectorCommand cmd, CancellationTokenSource cancellationTokenSource = default)
-        {
-            cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
+        public virtual async Task<ConnectorResult> ProcessAsync(ConnectorCommand cmd, CancellationTokenSource cancellationTokenSource = default) {
+            cancellationTokenSource ??= new CancellationTokenSource();
             var cancellationToken = cancellationTokenSource.Token;
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
-            if (cmd.Args == null) throw new ArgumentNullException(nameof(cmd.Args));
+            ArgumentNullException.ThrowIfNull(cmd);
+            ArgumentNullException.ThrowIfNull(cmd.Args);
 
             var hasReqId = !string.IsNullOrEmpty(cmd.ReqId);
 
@@ -75,18 +71,16 @@ namespace elFinder.Net.Core
         }
 
         protected virtual async Task<ConnectorResult> ProcessCoreAsync(ConnectorCommand cmd, Dictionary<string, string> cookies,
-            CancellationToken cancellationToken = default)
-        {
+            CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
-            if (cmd.Args == null) throw new ArgumentNullException(nameof(cmd.Args));
+            ArgumentNullException.ThrowIfNull(cmd);
+            ArgumentNullException.ThrowIfNull(cmd.Args);
 
             ErrorResponse errResp;
             HttpStatusCode errSttCode = HttpStatusCode.OK;
 
-            try
-            {
+            try {
                 if (options.EnabledCommands?.Contains(cmd.Cmd) == false) throw new CommandNoSupportException();
 
                 var args = cmd.Args;
@@ -95,30 +89,27 @@ namespace elFinder.Net.Core
                 if (string.IsNullOrEmpty(cmd.Cmd))
                     throw new CommandRequiredException();
 
-                switch (cmd.Cmd)
-                {
-                    case ConnectorCommand.Cmd_Abort:
-                        {
-                            var abortCmd = new AbortCommand();
-                            abortCmd.Id = args.GetValueOrDefault(ConnectorCommand.Param_Id);
+                switch (cmd.Cmd) {
+                    case ConnectorCommand.Cmd_Abort: {
+                            var abortCmd = new AbortCommand {
+                                Id = args.GetValueOrDefault(ConnectorCommand.Param_Id)
+                            };
 
                             var (success, reqCmd) = await connectorManager.AbortAsync(abortCmd.Id, cancellationToken: cancellationToken);
 
-                            if (success)
-                            {
+                            if (success) {
                                 await AbortAsync(reqCmd, cancellationToken: cancellationToken);
                             }
 
                             //return ConnectorResult.NoContent(new AbortResponse { success = success });
-                            return ConnectorResult.Success(new AbortResponse
-                            {
+                            return ConnectorResult.Success(new AbortResponse {
                                 success = success
                             });
                         }
-                    case ConnectorCommand.Cmd_Info:
-                        {
-                            var infoCmd = new InfoCommand();
-                            infoCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Info: {
+                            var infoCmd = new InfoCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
                             infoCmd.TargetPaths = await ParsePathsAsync(infoCmd.Targets, cancellationToken: cancellationToken);
                             cmd.CmdObject = infoCmd;
 
@@ -129,10 +120,10 @@ namespace elFinder.Net.Core
 
                             return ConnectorResult.Success(infoResp);
                         }
-                    case ConnectorCommand.Cmd_Open:
-                        {
-                            var openCmd = new OpenCommand();
-                            openCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Open: {
+                            var openCmd = new OpenCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target)
+                            };
                             openCmd.TargetPath = await ParsePathAsync(openCmd.Target, createIfNotExists: false, cancellationToken: cancellationToken);
                             openCmd.Mimes = options.MimeDetect == MimeDetectOption.Internal
                                 ? args.GetValueOrDefault(ConnectorCommand.Param_MimesArr)
@@ -149,10 +140,8 @@ namespace elFinder.Net.Core
 
                             var openResp = await openVolume.Driver.OpenAsync(openCmd, cancellationToken);
 
-                            if (openCmd.Tree == 1)
-                            {
-                                for (var i = 0; i < Volumes.Count; i++)
-                                {
+                            if (openCmd.Tree == 1) {
+                                for (var i = 0; i < Volumes.Count; i++) {
                                     var volume = Volumes[i];
 
                                     if (openCmd.TargetPath.IsRoot && volume == openVolume) continue;
@@ -166,15 +155,15 @@ namespace elFinder.Net.Core
 
                             return ConnectorResult.Success(openResp);
                         }
-                    case ConnectorCommand.Cmd_Archive:
-                        {
-                            var archiveCmd = new ArchiveCommand();
-                            archiveCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Archive: {
+                            var archiveCmd = new ArchiveCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Name = args.GetValueOrDefault(ConnectorCommand.Param_Name),
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets),
+                                Type = args.GetValueOrDefault(ConnectorCommand.Param_Type)
+                            };
                             archiveCmd.TargetPath = await ParsePathAsync(archiveCmd.Target, cancellationToken: cancellationToken);
-                            archiveCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Name);
-                            archiveCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
                             archiveCmd.TargetPaths = await ParsePathsAsync(archiveCmd.Targets, cancellationToken: cancellationToken);
-                            archiveCmd.Type = args.GetValueOrDefault(ConnectorCommand.Param_Type);
                             cmd.CmdObject = archiveCmd;
                             var volume = archiveCmd.TargetPath.Volume;
 
@@ -188,10 +177,10 @@ namespace elFinder.Net.Core
                             var archiveResp = await volume.Driver.ArchiveAsync(archiveCmd, cancellationToken);
                             return ConnectorResult.Success(archiveResp);
                         }
-                    case ConnectorCommand.Cmd_Extract:
-                        {
-                            var extractCmd = new ExtractCommand();
-                            extractCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Extract: {
+                            var extractCmd = new ExtractCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target)
+                            };
                             extractCmd.TargetPath = await ParsePathAsync(extractCmd.Target, cancellationToken: cancellationToken);
                             if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_MakeDir), out var makeDir))
                                 extractCmd.MakeDir = makeDir;
@@ -203,43 +192,43 @@ namespace elFinder.Net.Core
                             var extractResp = await extractCmd.TargetPath.Volume.Driver.ExtractAsync(extractCmd, cancellationToken);
                             return ConnectorResult.Success(extractResp);
                         }
-                    case ConnectorCommand.Cmd_Mkdir:
-                        {
-                            var mkdirCmd = new MkdirCommand();
-                            mkdirCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Mkdir: {
+                            var mkdirCmd = new MkdirCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Name = args.GetValueOrDefault(ConnectorCommand.Param_Name),
+                                Dirs = args.GetValueOrDefault(ConnectorCommand.Param_Dirs)
+                            };
                             mkdirCmd.TargetPath = await ParsePathAsync(mkdirCmd.Target, cancellationToken: cancellationToken);
-                            mkdirCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Name);
-                            mkdirCmd.Dirs = args.GetValueOrDefault(ConnectorCommand.Param_Dirs);
                             cmd.CmdObject = mkdirCmd;
 
                             var mkdirResp = await mkdirCmd.TargetPath.Volume.Driver.MkdirAsync(mkdirCmd, cancellationToken);
                             return ConnectorResult.Success(mkdirResp);
                         }
-                    case ConnectorCommand.Cmd_Mkfile:
-                        {
-                            var mkfileCmd = new MkfileCommand();
-                            mkfileCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Mkfile: {
+                            var mkfileCmd = new MkfileCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Name = args.GetValueOrDefault(ConnectorCommand.Param_Name)
+                            };
                             mkfileCmd.TargetPath = await ParsePathAsync(mkfileCmd.Target, cancellationToken: cancellationToken);
-                            mkfileCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Name);
                             cmd.CmdObject = mkfileCmd;
 
                             var mkFileResp = await mkfileCmd.TargetPath.Volume.Driver.MkfileAsync(mkfileCmd, cancellationToken);
                             return ConnectorResult.Success(mkFileResp);
                         }
-                    case ConnectorCommand.Cmd_Parents:
-                        {
-                            var parentsCmd = new ParentsCommand();
-                            parentsCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Parents: {
+                            var parentsCmd = new ParentsCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target)
+                            };
                             parentsCmd.TargetPath = await ParsePathAsync(parentsCmd.Target, cancellationToken: cancellationToken);
                             cmd.CmdObject = parentsCmd;
 
                             var parentsResp = await parentsCmd.TargetPath.Volume.Driver.ParentsAsync(parentsCmd, cancellationToken);
                             return ConnectorResult.Success(parentsResp);
                         }
-                    case ConnectorCommand.Cmd_Tmb:
-                        {
-                            var tmbCmd = new TmbCommand();
-                            tmbCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Tmb: {
+                            var tmbCmd = new TmbCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
                             tmbCmd.TargetPaths = await ParsePathsAsync(tmbCmd.Targets, cancellationToken: cancellationToken);
                             cmd.CmdObject = tmbCmd;
 
@@ -249,20 +238,20 @@ namespace elFinder.Net.Core
                             var tmbResp = await distinctVolumes[0].Driver.TmbAsync(tmbCmd, cancellationToken);
                             return ConnectorResult.Success(tmbResp);
                         }
-                    case ConnectorCommand.Cmd_Dim:
-                        {
-                            var dimCmd = new DimCommand();
-                            dimCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Dim: {
+                            var dimCmd = new DimCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target)
+                            };
                             dimCmd.TargetPath = await ParsePathAsync(dimCmd.Target, cancellationToken: cancellationToken);
                             cmd.CmdObject = dimCmd;
 
                             var dimResp = await dimCmd.TargetPath.Volume.Driver.DimAsync(dimCmd, cancellationToken);
                             return ConnectorResult.Success(dimResp);
                         }
-                    case ConnectorCommand.Cmd_Duplicate:
-                        {
-                            var dupCmd = new DuplicateCommand();
-                            dupCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Duplicate: {
+                            var dupCmd = new DuplicateCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
                             dupCmd.TargetPaths = await ParsePathsAsync(dupCmd.Targets, cancellationToken);
                             cmd.CmdObject = dupCmd;
 
@@ -272,14 +261,14 @@ namespace elFinder.Net.Core
                             var dupResp = await distinctVolumes[0].Driver.DuplicateAsync(dupCmd, cancellationToken);
                             return ConnectorResult.Success(dupResp);
                         }
-                    case ConnectorCommand.Cmd_Paste:
-                        {
-                            var pasteCmd = new PasteCommand();
-                            pasteCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Paste: {
+                            var pasteCmd = new PasteCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets),
+                                Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix),
+                                Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames),
+                                Dst = args.GetValueOrDefault(ConnectorCommand.Param_Dst)
+                            };
                             pasteCmd.TargetPaths = await ParsePathsAsync(pasteCmd.Targets, cancellationToken: cancellationToken);
-                            pasteCmd.Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix);
-                            pasteCmd.Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames);
-                            pasteCmd.Dst = args.GetValueOrDefault(ConnectorCommand.Param_Dst);
                             pasteCmd.DstPath = await ParsePathAsync(pasteCmd.Dst, cancellationToken: cancellationToken);
                             if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Cut), out var cut))
                                 pasteCmd.Cut = cut;
@@ -293,14 +282,14 @@ namespace elFinder.Net.Core
                             var pasteResp = await distinctVolumes[0].Driver.PasteAsync(pasteCmd, cancellationToken);
                             return ConnectorResult.Success(pasteResp);
                         }
-                    case ConnectorCommand.Cmd_Get:
-                        {
-                            var getCmd = new GetCommand();
-                            getCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Get: {
+                            var getCmd = new GetCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Current = args.GetValueOrDefault(ConnectorCommand.Param_Current),
+                                Conv = args.GetValueOrDefault(ConnectorCommand.Param_Conv)
+                            };
                             getCmd.TargetPath = await ParsePathAsync(getCmd.Target, cancellationToken: cancellationToken);
-                            getCmd.Current = args.GetValueOrDefault(ConnectorCommand.Param_Current);
                             getCmd.CurrentPath = await ParsePathAsync(getCmd.Current, cancellationToken: cancellationToken);
-                            getCmd.Conv = args.GetValueOrDefault(ConnectorCommand.Param_Conv);
                             cmd.CmdObject = getCmd;
                             var targetPath = getCmd.TargetPath;
 
@@ -310,21 +299,20 @@ namespace elFinder.Net.Core
                             var getResp = await targetPath.Volume.Driver.GetAsync(getCmd, cancellationToken);
                             return ConnectorResult.Success(getResp);
                         }
-                    case ConnectorCommand.Cmd_File:
-                        {
-                            var fileCmd = new FileCommand();
-                            fileCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
-                            fileCmd.TargetPath = await ParsePathAsync(fileCmd.Target, cancellationToken: cancellationToken);
+                    case ConnectorCommand.Cmd_File: {
+                            var fileCmd = new FileCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                ReqId = args.GetValueOrDefault(ConnectorCommand.Param_ReqId),
+                                CPath = args.GetValueOrDefault(ConnectorCommand.Param_CPath)
+                            };
                             if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Download), out var download))
                                 fileCmd.Download = download;
-                            fileCmd.ReqId = args.GetValueOrDefault(ConnectorCommand.Param_ReqId);
-                            fileCmd.CPath = args.GetValueOrDefault(ConnectorCommand.Param_CPath);
+                            fileCmd.TargetPath = await ParsePathAsync(fileCmd.Target, cancellationToken: cancellationToken);
                             cmd.CmdObject = fileCmd;
                             var targetPath = fileCmd.TargetPath;
                             var volume = targetPath.Volume;
 
-                            if (!string.IsNullOrEmpty(fileCmd.CPath))
-                            {
+                            if (!string.IsNullOrEmpty(fileCmd.CPath)) {
                                 // API >= 2.1.39
                                 cookies[ConnectorResult.Cookie_Elfdl + fileCmd.ReqId] = "1";
                             }
@@ -338,10 +326,10 @@ namespace elFinder.Net.Core
                             var fileResp = await fileCmd.TargetPath.Volume.Driver.FileAsync(fileCmd, cancellationToken);
                             return ConnectorResult.File(fileResp);
                         }
-                    case ConnectorCommand.Cmd_Rm:
-                        {
-                            var rmCmd = new RmCommand();
-                            rmCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Rm: {
+                            var rmCmd = new RmCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
                             rmCmd.TargetPaths = await ParsePathsAsync(rmCmd.Targets, cancellationToken: cancellationToken);
                             cmd.CmdObject = rmCmd;
 
@@ -351,40 +339,39 @@ namespace elFinder.Net.Core
                             // Command 'rm' with parent and children items, it means "Empty the parent folder"
                             var parents = rmCmd.TargetPaths.Select(path =>
                                 path.FileSystem.Parent?.FullName).Where(name => !string.IsNullOrEmpty(name)).Distinct().ToArray();
-                            rmCmd.TargetPaths = rmCmd.TargetPaths.Where(o => !parents.Contains(o.FileSystem.FullName)).ToArray();
+                            rmCmd.TargetPaths = [.. rmCmd.TargetPaths.Where(o => !parents.Contains(o.FileSystem.FullName))];
 
                             var rmResp = await distinctVolumes[0].Driver.RmAsync(rmCmd, cancellationToken);
                             return ConnectorResult.Success(rmResp);
                         }
-                    case ConnectorCommand.Cmd_Ls:
-                        {
-                            var lsCmd = new LsCommand();
-                            lsCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Ls: {
+                            var lsCmd = new LsCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Intersect = args.GetValueOrDefault(ConnectorCommand.Param_Intersect),
+                                Mimes = options.MimeDetect == MimeDetectOption.Internal
+                                    ? args.GetValueOrDefault(ConnectorCommand.Param_MimesArr)
+                                    : default
+                            };
                             lsCmd.TargetPath = await ParsePathAsync(lsCmd.Target, cancellationToken: cancellationToken);
-                            lsCmd.Intersect = args.GetValueOrDefault(ConnectorCommand.Param_Intersect);
-                            lsCmd.Mimes = options.MimeDetect == MimeDetectOption.Internal
-                                ? args.GetValueOrDefault(ConnectorCommand.Param_MimesArr)
-                                : default;
                             cmd.CmdObject = lsCmd;
 
                             var lsResp = await lsCmd.TargetPath.Volume.Driver.LsAsync(lsCmd, cancellationToken);
                             return ConnectorResult.Success(lsResp);
                         }
-                    case ConnectorCommand.Cmd_Put:
-                        {
-                            var putCmd = new PutCommand();
-                            putCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Put: {
+                            var putCmd = new PutCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Content = args.GetValueOrDefault(ConnectorCommand.Param_Content),
+                                Encoding = args.GetValueOrDefault(ConnectorCommand.Param_Encoding)
+                            };
                             putCmd.TargetPath = await ParsePathAsync(putCmd.Target, cancellationToken: cancellationToken);
-                            putCmd.Content = args.GetValueOrDefault(ConnectorCommand.Param_Content);
-                            putCmd.Encoding = args.GetValueOrDefault(ConnectorCommand.Param_Encoding);
                             cmd.CmdObject = putCmd;
                             var targetPath = putCmd.TargetPath;
 
                             if (targetPath.IsDirectory)
                                 throw new NotFileException();
 
-                            if (putCmd.Encoding == "hash")
-                            {
+                            if (putCmd.Encoding == "hash") {
                                 putCmd.ContentPath = await ParsePathAsync(putCmd.Content, cancellationToken: cancellationToken);
                                 if (putCmd.ContentPath.IsDirectory)
                                     throw new NotFileException();
@@ -393,10 +380,10 @@ namespace elFinder.Net.Core
                             var putResp = await putCmd.TargetPath.Volume.Driver.PutAsync(putCmd, cancellationToken);
                             return ConnectorResult.Success(putResp);
                         }
-                    case ConnectorCommand.Cmd_Size:
-                        {
-                            var sizeCmd = new SizeCommand();
-                            sizeCmd.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Size: {
+                            var sizeCmd = new SizeCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
                             sizeCmd.TargetPaths = await ParsePathsAsync(sizeCmd.Targets, cancellationToken: cancellationToken);
                             cmd.CmdObject = sizeCmd;
 
@@ -406,50 +393,47 @@ namespace elFinder.Net.Core
                             var sizeResp = await distinctVolumes[0].Driver.SizeAsync(sizeCmd, cancellationToken);
                             return ConnectorResult.Success(sizeResp);
                         }
-                    case ConnectorCommand.Cmd_Rename:
-                        {
-                            var renameCmd = new RenameCommand();
-                            renameCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Rename: {
+                            var renameCmd = new RenameCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Name = args.GetValueOrDefault(ConnectorCommand.Param_Name)
+                            };
                             var targetPath = await ParsePathAsync(renameCmd.Target, cancellationToken: cancellationToken);
                             var volume = targetPath.Volume;
                             renameCmd.TargetPath = targetPath;
-                            renameCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Name);
                             cmd.CmdObject = renameCmd;
 
                             var renameResp = await volume.Driver.RenameAsync(renameCmd, cancellationToken);
                             return ConnectorResult.Success(renameResp);
                         }
-                    case ConnectorCommand.Cmd_Tree:
-                        {
-                            var treeCmd = new TreeCommand();
-                            treeCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Tree: {
+                            var treeCmd = new TreeCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target)
+                            };
                             treeCmd.TargetPath = await ParsePathAsync(treeCmd.Target, cancellationToken: cancellationToken);
                             cmd.CmdObject = treeCmd;
 
                             var treeResp = await treeCmd.TargetPath.Volume.Driver.TreeAsync(treeCmd, cancellationToken);
                             return ConnectorResult.Success(treeResp);
                         }
-                    case ConnectorCommand.Cmd_Resize:
-                        {
-                            var resizeCmd = new ResizeCommand();
-                            resizeCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Resize: {
+                            var resizeCmd = new ResizeCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Mode = args.GetValueOrDefault(ConnectorCommand.Param_Mode)
+                            };
                             resizeCmd.TargetPath = await ParsePathAsync(resizeCmd.Target, cancellationToken: cancellationToken);
-                            resizeCmd.Mode = args.GetValueOrDefault(ConnectorCommand.Param_Mode);
                             if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Quality), out var quality))
                                 resizeCmd.Quality = quality;
 
-                            switch (resizeCmd.Mode)
-                            {
-                                case ResizeCommand.Mode_Resize:
-                                    {
+                            switch (resizeCmd.Mode) {
+                                case ResizeCommand.Mode_Resize: {
                                         if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Width), out var width))
                                             resizeCmd.Width = width;
                                         if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Height), out var height))
                                             resizeCmd.Height = height;
                                     }
                                     break;
-                                case ResizeCommand.Mode_Crop:
-                                    {
+                                case ResizeCommand.Mode_Crop: {
                                         if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Width), out var width))
                                             resizeCmd.Width = width;
                                         if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Height), out var height))
@@ -460,8 +444,7 @@ namespace elFinder.Net.Core
                                             resizeCmd.Y = y;
                                     }
                                     break;
-                                case ResizeCommand.Mode_Rotate:
-                                    {
+                                case ResizeCommand.Mode_Rotate: {
                                         if (int.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Degree), out var degree))
                                             resizeCmd.Degree = degree;
                                         resizeCmd.Background = args.GetValueOrDefault(ConnectorCommand.Param_Bg);
@@ -476,27 +459,24 @@ namespace elFinder.Net.Core
                             var resizeResp = await resizeCmd.TargetPath.Volume.Driver.ResizeAsync(resizeCmd, cancellationToken);
                             return ConnectorResult.Success(resizeResp);
                         }
-                    case ConnectorCommand.Cmd_Search:
-                        {
-                            var searchCmd = new SearchCommand();
-                            searchCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
+                    case ConnectorCommand.Cmd_Search: {
+                            var searchCmd = new SearchCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Q = args.GetValueOrDefault(ConnectorCommand.Param_Q),
+                                Mimes = args.GetValueOrDefault(ConnectorCommand.Param_MimesArr),
+                                Type = args.GetValueOrDefault(ConnectorCommand.Param_Type)
+                            };
                             searchCmd.TargetPath = await ParsePathAsync(searchCmd.Target, cancellationToken: cancellationToken);
-                            searchCmd.Q = args.GetValueOrDefault(ConnectorCommand.Param_Q);
-                            searchCmd.Mimes = args.GetValueOrDefault(ConnectorCommand.Param_MimesArr);
-                            searchCmd.Type = args.GetValueOrDefault(ConnectorCommand.Param_Type);
                             cmd.CmdObject = searchCmd;
 
                             SearchResponse finalSearchResp;
                             if (searchCmd.TargetPath != null)
                                 finalSearchResp = await searchCmd.TargetPath.Volume.Driver.SearchAsync(searchCmd, cancellationToken);
-                            else
-                            {
+                            else {
                                 finalSearchResp = new SearchResponse();
 
-                                foreach (var volume in Volumes)
-                                {
-                                    var searchResp = await volume.Driver.SearchAsync(new SearchCommand
-                                    {
+                                foreach (var volume in Volumes) {
+                                    var searchResp = await volume.Driver.SearchAsync(new SearchCommand {
                                         Mimes = searchCmd.Mimes,
                                         Q = searchCmd.Q,
                                         Target = volume.VolumeId,
@@ -511,23 +491,23 @@ namespace elFinder.Net.Core
                         }
 
                     // Remember to update AbortAsync
-                    case ConnectorCommand.Cmd_Upload:
-                        {
-                            var uploadCmd = new UploadCommand();
-                            uploadCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
-                            uploadCmd.TargetPath = await ParsePathAsync(uploadCmd.Target, cancellationToken: cancellationToken);
-                            uploadCmd.Mimes = args.GetValueOrDefault(ConnectorCommand.Param_Mimes);
-                            uploadCmd.Upload = cmd.Files.Where(o => o.Name == ConnectorCommand.Param_Upload).ToArray();
-                            uploadCmd.UploadPath = args.GetValueOrDefault(ConnectorCommand.Param_UploadPath);
-                            uploadCmd.UploadPathInfos = await ParsePathsAsync(uploadCmd.UploadPath, cancellationToken);
-                            uploadCmd.MTime = args.GetValueOrDefault(ConnectorCommand.Param_MTime);
-                            uploadCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Names);
-                            uploadCmd.Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames);
-                            uploadCmd.Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix);
-                            uploadCmd.Hashes = args.Where(kvp => kvp.Key.StartsWith(ConnectorCommand.Param_Hashes_Start))
-                                .ToDictionary(o => o.Key, o => (string)o.Value);
+                    case ConnectorCommand.Cmd_Upload: {
+                            var uploadCmd = new UploadCommand {
+                                Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                                Mimes = args.GetValueOrDefault(ConnectorCommand.Param_Mimes),
+                                Upload = [.. cmd.Files.Where(o => o.Name == ConnectorCommand.Param_Upload)],
+                                UploadPath = args.GetValueOrDefault(ConnectorCommand.Param_UploadPath),
+                                MTime = args.GetValueOrDefault(ConnectorCommand.Param_MTime),
+                                Name = args.GetValueOrDefault(ConnectorCommand.Param_Names),
+                                Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames),
+                                Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix),
+                                Hashes = args.Where(kvp => kvp.Key.StartsWith(ConnectorCommand.Param_Hashes_Start))
+                                    .ToDictionary(o => o.Key, o => (string)o.Value)
+                            };
                             if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Overwrite), out var overwrite))
                                 uploadCmd.Overwrite = overwrite;
+                            uploadCmd.UploadPathInfos = await ParsePathsAsync(uploadCmd.UploadPath, cancellationToken);
+                            uploadCmd.TargetPath = await ParsePathAsync(uploadCmd.Target, cancellationToken: cancellationToken);
 
                             // Chunked upload processing
                             uploadCmd.UploadName = args.GetValueOrDefault(ConnectorCommand.Param_Upload);
@@ -544,25 +524,19 @@ namespace elFinder.Net.Core
                             if (uploadCmd.UploadPathInfos.Any(path => path.Volume != volume))
                                 throw new CommandParamsException(ConnectorCommand.Cmd_Upload);
 
-                            if (uploadCmd.UploadName == UploadCommand.ChunkFail && uploadCmd.Mimes == UploadCommand.ChunkFail)
-                            {
+                            if (uploadCmd.UploadName == UploadCommand.ChunkFail && uploadCmd.Mimes == UploadCommand.ChunkFail) {
                                 await volume.Driver.AbortUploadAsync(uploadCmd, cancellationToken);
                                 throw new ConnectionAbortedException();
-                            }
-                            else if (isChunking && !isChunkMerge
-                                && (uploadCmd.Upload.Count() != 1
-                                    || uploadCmd.Upload.Single().Length > uploadCmd.RangeInfo.TotalBytes))
-                            {
+                            } else if (isChunking && !isChunkMerge
+                                  && (uploadCmd.Upload.Count() != 1
+                                      || uploadCmd.Upload.Single().Length > uploadCmd.RangeInfo.TotalBytes)) {
                                 throw new CommandParamsException(ConnectorCommand.Cmd_Upload);
-                            }
-                            else if (isChunkMerge && (string.IsNullOrWhiteSpace(uploadCmd.UploadName)
-                                    || string.IsNullOrWhiteSpace(uploadCmd.Chunk)))
-                            {
+                            } else if (isChunkMerge && (string.IsNullOrWhiteSpace(uploadCmd.UploadName)
+                                      || string.IsNullOrWhiteSpace(uploadCmd.Chunk))) {
                                 throw new CommandParamsException(ConnectorCommand.Cmd_Upload);
                             }
 
-                            if (volume.MaxUploadSize.HasValue)
-                            {
+                            if (volume.MaxUploadSize.HasValue) {
                                 if (uploadCmd.Upload.Any(file => file.Length > volume.MaxUploadSize))
                                     throw new UploadFileSizeException();
                             }
@@ -570,18 +544,17 @@ namespace elFinder.Net.Core
                             var uploadResp = await volume.Driver.UploadAsync(uploadCmd, cancellationToken);
                             return ConnectorResult.Success(uploadResp);
                         }
-                    case ConnectorCommand.Cmd_Zipdl:
-                        {
-                            var zipdlCommand = new ZipdlCommand();
-                            zipdlCommand.Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets);
+                    case ConnectorCommand.Cmd_Zipdl: {
+                            var zipdlCommand = new ZipdlCommand {
+                                Targets = args.GetValueOrDefault(ConnectorCommand.Param_Targets)
+                            };
 
                             if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Download), out var download))
                                 zipdlCommand.Download = download;
 
                             cmd.CmdObject = zipdlCommand;
 
-                            if (zipdlCommand.Download != 1)
-                            {
+                            if (zipdlCommand.Download != 1) {
                                 zipdlCommand.TargetPaths = await ParsePathsAsync(zipdlCommand.Targets, cancellationToken: cancellationToken);
                                 var distinctVolumes = zipdlCommand.TargetPaths.Select(p => p.Volume).Distinct().ToArray();
                                 if (distinctVolumes.Length != 1) throw new CommandParamsException(ConnectorCommand.Cmd_Zipdl);
@@ -601,46 +574,27 @@ namespace elFinder.Net.Core
                         }
                     default: throw new UnknownCommandException();
                 }
-            }
-            catch (Exception generalEx)
-            {
+            } catch (Exception generalEx) {
                 var rootCause = generalEx.GetRootCause();
 
-                if (rootCause is ConnectorException ex)
-                {
+                if (rootCause is ConnectorException ex) {
                     errResp = ex.ErrorResponse;
                     if (ex.StatusCode != null) errSttCode = ex.StatusCode.Value;
-                }
-                else if (rootCause is UnauthorizedAccessException uaEx)
-                {
+                } else if (rootCause is UnauthorizedAccessException uaEx) {
                     errResp = ErrorResponse.Factory.AccessDenied(uaEx);
-                }
-                else if (rootCause is FileNotFoundException fnfEx)
-                {
+                } else if (rootCause is FileNotFoundException fnfEx) {
                     errResp = ErrorResponse.Factory.FileNotFound(fnfEx);
-                }
-                else if (rootCause is DirectoryNotFoundException dnfEx)
-                {
+                } else if (rootCause is DirectoryNotFoundException dnfEx) {
                     errResp = ErrorResponse.Factory.FolderNotFound(dnfEx);
-                }
-                else if (rootCause is TaskCanceledException taskEx)
-                {
+                } else if (rootCause is TaskCanceledException taskEx) {
                     errResp = ErrorResponse.Factory.ConnectionAborted(taskEx);
-                }
-                else if (rootCause is OperationCanceledException opEx)
-                {
+                } else if (rootCause is OperationCanceledException opEx) {
                     errResp = ErrorResponse.Factory.ConnectionAborted(opEx);
-                }
-                else if (rootCause is IOException ioEx)
-                {
+                } else if (rootCause is IOException ioEx) {
                     errResp = ErrorResponse.Factory.AccessDenied(ioEx);
-                }
-                else if (rootCause is ArgumentException argEx)
-                {
+                } else if (rootCause is ArgumentException argEx) {
                     errResp = ErrorResponse.Factory.CommandParams(argEx, cmd.Cmd);
-                }
-                else
-                {
+                } else {
                     errResp = ErrorResponse.Factory.Unknown(generalEx);
                     errSttCode = HttpStatusCode.InternalServerError;
                 }
@@ -652,40 +606,32 @@ namespace elFinder.Net.Core
         }
 
         public virtual async Task<PathInfo> ParsePathAsync(string target,
-            bool createIfNotExists = true, bool fileByDefault = true, CancellationToken cancellationToken = default)
-        {
+            bool createIfNotExists = true, bool fileByDefault = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (string.IsNullOrEmpty(target)) return null;
 
             var underscoreIdx = target.IndexOf('_');
-            var volumeId = target.Substring(0, underscoreIdx + 1);
-            var pathHash = target.Substring(underscoreIdx + 1);
+            var volumeId = target[..(underscoreIdx + 1)];
+            var pathHash = target[(underscoreIdx + 1)..];
             var filePath = pathParser.Decode(pathHash);
 
-            IVolume volume = Volumes.FirstOrDefault(v => v.VolumeId == volumeId);
-
-            if (volume == null) throw new FileNotFoundException();
-
+            IVolume volume = Volumes.FirstOrDefault(v => v.VolumeId == volumeId) ?? throw new FileNotFoundException();
             return await volume.Driver.ParsePathAsync(filePath, volume, target, createIfNotExists, fileByDefault, cancellationToken);
         }
 
-        public virtual string AddVolume(IVolume volume)
-        {
+        public virtual string AddVolume(IVolume volume) {
             Volumes.Add(volume);
 
-            if (volume.VolumeId is null)
-                volume.VolumeId = $"{Volume.VolumePrefix}{Volumes.Count}{Volume.HashSeparator}";
+            volume.VolumeId ??= $"{Volume.VolumePrefix}{Volumes.Count}{Volume.HashSeparator}";
 
             return volume.VolumeId;
         }
 
-        public virtual async Task<ImageWithMimeType> GetThumbAsync(string target, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ImageWithMimeType> GetThumbAsync(string target, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (target != null)
-            {
+            if (target != null) {
                 var pathInfo = await ParsePathAsync(target, cancellationToken: cancellationToken);
 
                 return await pathInfo.Volume.Driver.GetThumbAsync(pathInfo, cancellationToken: cancellationToken);
@@ -694,8 +640,7 @@ namespace elFinder.Net.Core
             return null;
         }
 
-        public virtual async Task<IEnumerable<PathInfo>> ParsePathsAsync(IEnumerable<string> targets, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<IEnumerable<PathInfo>> ParsePathsAsync(IEnumerable<string> targets, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var tasks = targets.Select(async t => await ParsePathAsync(t, cancellationToken: cancellationToken));
@@ -703,12 +648,12 @@ namespace elFinder.Net.Core
             return await Task.WhenAll(tasks);
         }
 
-        public async Task AbortAsync(RequestCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public async Task AbortAsync(RequestCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (cmd == null) throw new ArgumentNullException(nameof(cmd));
-            if (cmd.Args == null) throw new ArgumentNullException(nameof(cmd.Args));
+            ArgumentNullException.ThrowIfNull(cmd);
+            ArgumentNullException.ThrowIfNull(cmd.Args);
+
 
             if (options.EnabledCommands?.Contains(cmd.Cmd) == false) throw new CommandNoSupportException();
 
@@ -718,24 +663,23 @@ namespace elFinder.Net.Core
             if (string.IsNullOrEmpty(cmd.Cmd))
                 throw new CommandRequiredException();
 
-            switch (cmd.Cmd)
-            {
-                case ConnectorCommand.Cmd_Upload:
-                    {
-                        var uploadCmd = new UploadCommand();
-                        uploadCmd.Target = args.GetValueOrDefault(ConnectorCommand.Param_Target);
-                        uploadCmd.TargetPath = await ParsePathAsync(uploadCmd.Target, cancellationToken: cancellationToken);
-                        uploadCmd.Mimes = args.GetValueOrDefault(ConnectorCommand.Param_Mimes);
-                        uploadCmd.UploadPath = args.GetValueOrDefault(ConnectorCommand.Param_UploadPath);
-                        uploadCmd.UploadPathInfos = await ParsePathsAsync(uploadCmd.UploadPath, cancellationToken);
-                        uploadCmd.MTime = args.GetValueOrDefault(ConnectorCommand.Param_MTime);
-                        uploadCmd.Name = args.GetValueOrDefault(ConnectorCommand.Param_Names);
-                        uploadCmd.Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames);
-                        uploadCmd.Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix);
-                        uploadCmd.Hashes = args.Where(kvp => kvp.Key.StartsWith(ConnectorCommand.Param_Hashes_Start))
-                            .ToDictionary(o => o.Key, o => (string)o.Value);
+            switch (cmd.Cmd) {
+                case ConnectorCommand.Cmd_Upload: {
+                        var uploadCmd = new UploadCommand {
+                            Target = args.GetValueOrDefault(ConnectorCommand.Param_Target),
+                            Mimes = args.GetValueOrDefault(ConnectorCommand.Param_Mimes),
+                            UploadPath = args.GetValueOrDefault(ConnectorCommand.Param_UploadPath),
+                            MTime = args.GetValueOrDefault(ConnectorCommand.Param_MTime),
+                            Name = args.GetValueOrDefault(ConnectorCommand.Param_Names),
+                            Renames = args.GetValueOrDefault(ConnectorCommand.Param_Renames),
+                            Suffix = args.GetValueOrDefault(ConnectorCommand.Param_Suffix),
+                            Hashes = args.Where(kvp => kvp.Key.StartsWith(ConnectorCommand.Param_Hashes_Start))
+                                .ToDictionary(o => o.Key, o => (string)o.Value)
+                        };
                         if (byte.TryParse(args.GetValueOrDefault(ConnectorCommand.Param_Overwrite), out var overwrite))
                             uploadCmd.Overwrite = overwrite;
+                        uploadCmd.TargetPath = await ParsePathAsync(uploadCmd.Target, cancellationToken: cancellationToken);
+                        uploadCmd.UploadPathInfos = await ParsePathsAsync(uploadCmd.UploadPath, cancellationToken);
 
                         // Chunked upload processing
                         uploadCmd.UploadName = args.GetValueOrDefault(ConnectorCommand.Param_Upload);
@@ -746,8 +690,7 @@ namespace elFinder.Net.Core
                         var isChunkMerge = isChunking && uploadCmd.Cid.ToString().Length == 0;
                         var uploadCount = uploadCmd.Upload.Count();
 
-                        if (uploadCmd.UploadName == UploadCommand.ChunkFail && uploadCmd.Mimes == UploadCommand.ChunkFail)
-                        {
+                        if (uploadCmd.UploadName == UploadCommand.ChunkFail && uploadCmd.Mimes == UploadCommand.ChunkFail) {
                             return;
                         }
 
@@ -760,8 +703,7 @@ namespace elFinder.Net.Core
 
                         var volume = uploadCmd.TargetPath.Volume;
 
-                        if (volume.MaxUploadSize.HasValue)
-                        {
+                        if (volume.MaxUploadSize.HasValue) {
                             if (uploadCmd.Upload.Any(file => file.Length > volume.MaxUploadSize))
                                 throw new UploadFileSizeException();
                         }

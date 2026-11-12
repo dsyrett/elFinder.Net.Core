@@ -5,49 +5,42 @@ using elFinder.Net.Core.Helpers;
 using elFinder.Net.Core.Services.Drawing;
 using elFinder.Net.Drivers.FileSystem.Extensions;
 using elFinder.Net.Drivers.FileSystem.Helpers;
+
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace elFinder.Net.Drivers.FileSystem
-{
-    public class FileSystemFile : IFile
-    {
+namespace elFinder.Net.Drivers.FileSystem {
+    public class FileSystemFile : IFile {
         protected FileInfo fileInfo;
         protected readonly IVolume volume;
 
-        public FileSystemFile(string filePath, IVolume volume)
-        {
+        public FileSystemFile(string filePath, IVolume volume) {
             fileInfo = new FileInfo(filePath);
             this.volume = volume;
         }
 
-        public FileSystemFile(FileInfo fileInfo, IVolume volume)
-        {
+        public FileSystemFile(FileInfo fileInfo, IVolume volume) {
             this.fileInfo = fileInfo;
             this.volume = volume;
         }
 
         public IVolume Volume => volume;
 
-        public virtual FileAttributes Attributes
-        {
+        public virtual FileAttributes Attributes {
             get => fileInfo.Attributes;
             set => fileInfo.Attributes = value;
         }
 
         private ObjectAttribute _objAttr;
-        public virtual ObjectAttribute ObjectAttribute
-        {
-            get
-            {
+        public virtual ObjectAttribute ObjectAttribute {
+            get {
                 if (ByPassObjectAttribute) return ObjectAttribute.Default;
 
                 if (!volume.Own(this)) return ObjectAttribute.Default;
 
-                if (_objAttr == null)
-                    _objAttr = this.GetObjectAttribute(volume);
+                _objAttr ??= this.GetObjectAttribute(volume);
 
                 return _objAttr;
             }
@@ -56,12 +49,9 @@ namespace elFinder.Net.Drivers.FileSystem
         public virtual bool ByPassObjectAttribute { get; set; }
 
         private IDirectory _parent;
-        public virtual IDirectory Parent
-        {
-            get
-            {
-                if (_parent == null)
-                    _parent = new FileSystemDirectory(fileInfo.Directory, volume);
+        public virtual IDirectory Parent {
+            get {
+                _parent ??= new FileSystemDirectory(fileInfo.Directory, volume);
                 return _parent;
             }
         }
@@ -81,18 +71,14 @@ namespace elFinder.Net.Drivers.FileSystem
         public virtual string Name => fileInfo.Name;
 
         private MimeType? _mimeType;
-        public virtual MimeType MimeType
-        {
-            get
-            {
-                if (_mimeType == null)
-                    _mimeType = MimeHelper.GetMimeType(Extension);
+        public virtual MimeType MimeType {
+            get {
+                _mimeType ??= MimeHelper.GetMimeType(Extension);
                 return _mimeType.Value;
             }
         }
 
-        public virtual Task<Stream> OpenReadAsync(bool verify = true, CancellationToken cancellationToken = default)
-        {
+        public virtual Task<Stream> OpenReadAsync(bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !ObjectAttribute.Read) throw new PermissionDeniedException();
@@ -101,8 +87,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return Task.FromResult<Stream>(fileInfo.OpenRead());
         }
 
-        public virtual Task RefreshAsync(CancellationToken cancellationToken = default)
-        {
+        public virtual Task RefreshAsync(CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             fileInfo.Refresh();
@@ -110,8 +95,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return Task.CompletedTask;
         }
 
-        public virtual async Task OverwriteAsync(Stream stream, bool verify = true, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task OverwriteAsync(Stream stream, bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !await this.CanWriteAsync(cancellationToken: cancellationToken))
@@ -121,14 +105,11 @@ namespace elFinder.Net.Drivers.FileSystem
                 throw new ExistsException(Name);
 
             GCHelper.WaitForCollect();
-            using (var destination = File.Open(fileInfo.FullName, FileMode.Create))
-            {
-                await stream.CopyToAsync(destination);
-            }
+            using var destination = File.Open(fileInfo.FullName, FileMode.Create);
+            await stream.CopyToAsync(destination, cancellationToken);
         }
 
-        public virtual async Task<Stream> OpenWriteAsync(bool verify = true, FileMode fileMode = FileMode.Create, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<Stream> OpenWriteAsync(bool verify = true, FileMode fileMode = FileMode.Create, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !await this.CanWriteAsync(cancellationToken: cancellationToken))
@@ -141,8 +122,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return File.Open(fileInfo.FullName, fileMode);
         }
 
-        public virtual Task CreateAsync(bool verify = true, CancellationToken cancellationToken = default)
-        {
+        public virtual Task CreateAsync(bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !this.CanCreate()) throw new PermissionDeniedException();
@@ -157,28 +137,24 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         public virtual async Task<ImageWithMimeType> CreateThumbAsync(IFile file, int tmbSize, IPictureEditor pictureEditor,
-            bool verify = true, CancellationToken cancellationToken = default)
-        {
+            bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!await Parent.ExistsAsync)
                 await Parent.CreateAsync(verify, cancellationToken: cancellationToken);
 
-            using (var original = await file.OpenReadAsync(verify: false, cancellationToken: cancellationToken))
-            {
-                var thumb = await pictureEditor.GenerateThumbnailAsync(original, tmbSize, true);
+            using var original = await file.OpenReadAsync(verify: false, cancellationToken: cancellationToken);
+            var thumb = await pictureEditor.GenerateThumbnailAsync(original, tmbSize, true);
 
-                if (thumb == null) return null;
+            if (thumb == null) return null;
 
-                await OverwriteAsync(thumb.ImageStream, verify, cancellationToken: cancellationToken);
+            await OverwriteAsync(thumb.ImageStream, verify, cancellationToken: cancellationToken);
 
-                return thumb;
-            }
+            return thumb;
         }
 
         public virtual async Task<ImageWithMimeType> CreateThumbAsync(IFile file, int tmbSize, IVideoEditor videoEditor,
-            bool verify = true, CancellationToken cancellationToken = default)
-        {
+            bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!await Parent.ExistsAsync)
@@ -193,8 +169,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return thumb;
         }
 
-        public virtual Task DeleteAsync(bool verify = true, CancellationToken cancellationToken = default)
-        {
+        public virtual Task DeleteAsync(bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !this.CanDelete()) throw new PermissionDeniedException();
@@ -203,8 +178,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return Task.CompletedTask;
         }
 
-        public virtual Task<IFile> RenameAsync(string newName, bool verify = true, CancellationToken cancellationToken = default)
-        {
+        public virtual Task<IFile> RenameAsync(string newName, bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !this.CanRename()) throw new PermissionDeniedException();
@@ -215,8 +189,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         public virtual async Task<IFile> CopyToAsync(string newDest, IVolume destVolume, bool copyOverwrite,
-            bool verify = true, CancellationToken cancellationToken = default)
-        {
+            bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !this.CanCopy()) throw new PermissionDeniedException();
@@ -234,8 +207,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         public virtual async Task<IFile> MoveToAsync(string newDest, IVolume destVolume,
-            bool verify = true, CancellationToken cancellationToken = default)
-        {
+            bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (verify && !this.CanMove()) throw new PermissionDeniedException();
@@ -252,25 +224,21 @@ namespace elFinder.Net.Drivers.FileSystem
             return new FileSystemFile(newDest, destVolume);
         }
 
-        public virtual Task<bool> IsChildOfAsync(string fullPath)
-        {
+        public virtual Task<bool> IsChildOfAsync(string fullPath) {
             return Task.FromResult(FullName.StartsWith(fullPath + volume.DirectorySeparatorChar));
         }
 
-        public virtual Task<bool> IsChildOfAsync(IDirectory directory)
-        {
+        public virtual Task<bool> IsChildOfAsync(IDirectory directory) {
             return Task.FromResult(FullName.StartsWith(directory.FullName + volume.DirectorySeparatorChar));
         }
 
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             if (obj is IFile file)
                 return file.FullName == FullName;
             return false;
         }
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return FullName.GetHashCode();
         }
     }

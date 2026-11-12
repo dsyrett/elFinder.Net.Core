@@ -9,6 +9,7 @@ using elFinder.Net.Drivers.FileSystem.Helpers;
 using elFinder.Net.Drivers.FileSystem.Services;
 using elFinder.Net.Plugins.FileSystemQuotaManagement.Extensions;
 using elFinder.Net.Plugins.LoggingExample.Extensions;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -18,17 +19,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using System.IO;
 
-namespace elFinder.Net.AdvancedDemo
-{
-    public class Startup
-    {
+namespace elFinder.Net.AdvancedDemo {
+    public class Startup {
         public const string StorageFolder = ".storage";
         public const string TempFileFolder = ".temp";
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
-        {
+        public Startup(IConfiguration configuration, IWebHostEnvironment env) {
             Configuration = configuration;
             WebRootPath = env.WebRootPath;
             StoragePath = new DirectoryInfo(StorageFolder).FullName;
@@ -39,8 +38,7 @@ namespace elFinder.Net.AdvancedDemo
         public static string StoragePath { get; private set; }
         public static string TempPath { get; private set; }
 
-        public static string MapStoragePath(string path)
-        {
+        public static string MapStoragePath(string path) {
             path = path.Replace("~/", "").TrimStart('/').Replace('/', '\\');
             return PathHelper.GetFullPath(PathHelper.SafelyCombine(StoragePath, StoragePath, path));
         }
@@ -48,14 +46,12 @@ namespace elFinder.Net.AdvancedDemo
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
+        public void ConfigureServices(IServiceCollection services) {
             var pluginCollection = new PluginCollection();
 
             services.AddElFinderAspNetCore()
                 .AddFileSystemDriver(typeof(ApplicationFileSystemDriver),
-                    tempFileCleanerConfig: (opt) =>
-                    {
+                    tempFileCleanerConfig: (opt) => {
                         opt.ScanFolders.Add(TempPath, TempFileCleanerOptions.DefaultUnmanagedLifeTime);
                     })
                 .AddFileSystemQuotaManagement(pluginCollection,
@@ -72,17 +68,14 @@ namespace elFinder.Net.AdvancedDemo
             // Since elFinder use HTML5 download (hyper link), there is no Authorization header
             // --> better to use Cookies authentication (or mixed: need customization)
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                {
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
                     //...
                 })
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-                {
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options => {
                     //...
                 });
 
-            services.AddResponseCompression(options =>
-            {
+            services.AddResponseCompression(options => {
                 options.EnableForHttps = true;
                 options.Providers.Add<GzipCompressionProvider>();
             });
@@ -90,20 +83,16 @@ namespace elFinder.Net.AdvancedDemo
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = System.IO.Compression.CompressionLevel.Fastest);
 
             services.AddRazorPages();
-            services.AddControllersWithViews().AddNewtonsoftJson();
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
             Directory.CreateDirectory(MapStoragePath("./upload"));
 
-            if (env.IsDevelopment())
-            {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
+            } else {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -118,8 +107,7 @@ namespace elFinder.Net.AdvancedDemo
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
+            app.UseEndpoints(endpoints => {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });

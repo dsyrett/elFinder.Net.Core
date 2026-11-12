@@ -3,21 +3,20 @@ using elFinder.Net.Core;
 using elFinder.Net.Drivers.FileSystem.Extensions;
 using elFinder.Net.Drivers.FileSystem.Helpers;
 using elFinder.Net.Drivers.FileSystem.Services;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using System.Collections.Generic;
 using System.IO;
 
-namespace elFinder.Net.Demo31
-{
-    public class Startup
-    {
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
-        {
+namespace elFinder.Net.Demo31 {
+    public class Startup {
+        public Startup(IConfiguration configuration, IWebHostEnvironment env) {
             Configuration = configuration;
             WebRootPath = env.WebRootPath;
         }
@@ -25,10 +24,8 @@ namespace elFinder.Net.Demo31
         public static string WebRootPath { get; private set; }
         public static string TempPath { get; } = Path.GetTempPath();
 
-        public static string MapPath(string path, string basePath = null)
-        {
-            if (string.IsNullOrEmpty(basePath))
-            {
+        public static string MapPath(string path, string basePath = null) {
+            if (string.IsNullOrEmpty(basePath)) {
                 basePath = WebRootPath;
             }
 
@@ -39,18 +36,15 @@ namespace elFinder.Net.Demo31
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
+        public void ConfigureServices(IServiceCollection services) {
             #region elFinder
             services.AddElFinderAspNetCore()
-                .AddFileSystemDriver(tempFileCleanerConfig: (opt) =>
-                {
+                .AddFileSystemDriver(tempFileCleanerConfig: (opt) => {
                     opt.ScanFolders.Add(TempPath, TempFileCleanerOptions.DefaultUnmanagedLifeTime);
                 });
             #endregion
 
-            services.AddResponseCompression(options =>
-            {
+            services.AddResponseCompression(options => {
                 options.EnableForHttps = true;
                 options.Providers.Add<GzipCompressionProvider>();
             });
@@ -58,18 +52,14 @@ namespace elFinder.Net.Demo31
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = System.IO.Compression.CompressionLevel.Fastest);
 
             services.AddRazorPages();
-            services.AddControllersWithViews().AddNewtonsoftJson();
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IEnumerable<IVolume> volumes)
-        {
-            if (env.IsDevelopment())
-            {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IEnumerable<IVolume> volumes) {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
+            } else {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -81,8 +71,7 @@ namespace elFinder.Net.Demo31
 
             app.UseRouting();
 
-            app.UseEndpoints(endpoints =>
-            {
+            app.UseEndpoints(endpoints => {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });

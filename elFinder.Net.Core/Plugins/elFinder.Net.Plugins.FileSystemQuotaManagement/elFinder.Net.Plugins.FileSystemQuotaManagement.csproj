@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Authors>Trung Tran</Authors>
+    <TargetFramework>net11.0</TargetFramework>
+    <Authors>Trung Tran, David Syrett</Authors>
     <Company>N/A</Company>
     <Description>A plugin to enable quota management features on volumes (support FileSystemDriver only)</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.4.1" />
+    <PackageReference Include="Castle.Core" Version="5.2.1" />
   </ItemGroup>
 
   <ItemGroup>

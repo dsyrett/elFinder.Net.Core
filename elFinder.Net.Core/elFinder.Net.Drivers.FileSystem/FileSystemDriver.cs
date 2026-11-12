@@ -12,6 +12,7 @@ using elFinder.Net.Drivers.FileSystem.Extensions;
 using elFinder.Net.Drivers.FileSystem.Helpers;
 using elFinder.Net.Drivers.FileSystem.Services;
 using elFinder.Net.Drivers.FileSystem.Streams;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,10 +24,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace elFinder.Net.Drivers.FileSystem
-{
-    public class FileSystemDriver : IDriver
-    {
+namespace elFinder.Net.Drivers.FileSystem {
+    public class FileSystemDriver : IDriver {
         public const string ChunkingFolderPrefix = "_uploading_";
         public const string DefaultThumbExt = ".png";
         public const string CustomSearchMethodPrefix = "SearchMatch";
@@ -43,43 +42,43 @@ namespace elFinder.Net.Drivers.FileSystem
         protected readonly ICryptographyProvider cryptographyProvider;
         protected readonly ITempFileCleaner tempFileCleaner;
 
-        public EventList<BeforeRemoveThumbAsync> OnBeforeRemoveThumb { get; } = new EventList<BeforeRemoveThumbAsync>();
-        public EventList<AfterRemoveThumbAsync> OnAfterRemoveThumb { get; } = new EventList<AfterRemoveThumbAsync>();
-        public EventList<RemoveThumbErrorAsync> OnRemoveThumbError { get; } = new EventList<RemoveThumbErrorAsync>();
-        public EventList<BeforeMakeDirAsync> OnBeforeMakeDir { get; } = new EventList<BeforeMakeDirAsync>();
-        public EventList<AfterMakeDirAsync> OnAfterMakeDir { get; } = new EventList<AfterMakeDirAsync>();
-        public EventList<BeforeMakeFileAsync> OnBeforeMakeFile { get; } = new EventList<BeforeMakeFileAsync>();
-        public EventList<AfterMakeFileAsync> OnAfterMakeFile { get; } = new EventList<AfterMakeFileAsync>();
-        public EventList<BeforeRenameAsync> OnBeforeRename { get; } = new EventList<BeforeRenameAsync>();
-        public EventList<AfterRenameAsync> OnAfterRename { get; } = new EventList<AfterRenameAsync>();
-        public EventList<BeforeRemoveAsync> OnBeforeRemove { get; } = new EventList<BeforeRemoveAsync>();
-        public EventList<AfterRemoveAsync> OnAfterRemove { get; } = new EventList<AfterRemoveAsync>();
-        public EventList<BeforeRollbackChunkAsync> OnBeforeRollbackChunk { get; } = new EventList<BeforeRollbackChunkAsync>();
-        public EventList<AfterRollbackChunkAsync> OnAfterRollbackChunk { get; } = new EventList<AfterRollbackChunkAsync>();
-        public EventList<BeforeUploadAsync> OnBeforeUpload { get; } = new EventList<BeforeUploadAsync>();
-        public EventList<AfterUploadAsync> OnAfterUpload { get; } = new EventList<AfterUploadAsync>();
-        public EventList<BeforeChunkMergedAsync> OnBeforeChunkMerged { get; } = new EventList<BeforeChunkMergedAsync>();
-        public EventList<AfterChunkMergedAsync> OnAfterChunkMerged { get; } = new EventList<AfterChunkMergedAsync>();
-        public EventList<BeforeChunkTransferAsync> OnBeforeChunkTransfer { get; } = new EventList<BeforeChunkTransferAsync>();
-        public EventList<AfterChunkTransferAsync> OnAfterChunkTransfer { get; } = new EventList<AfterChunkTransferAsync>();
-        public EventList<UploadErrorAsync> OnUploadError { get; } = new EventList<UploadErrorAsync>();
-        public EventList<BeforeMoveAsync> OnBeforeMove { get; } = new EventList<BeforeMoveAsync>();
-        public EventList<AfterMoveAsync> OnAfterMove { get; } = new EventList<AfterMoveAsync>();
-        public EventList<BeforeCopyAsync> OnBeforeCopy { get; } = new EventList<BeforeCopyAsync>();
-        public EventList<AfterCopyAsync> OnAfterCopy { get; } = new EventList<AfterCopyAsync>();
-        public EventList<BeforeArchiveAsync> OnBeforeArchive { get; } = new EventList<BeforeArchiveAsync>();
-        public EventList<AfterArchiveAsync> OnAfterArchive { get; } = new EventList<AfterArchiveAsync>();
-        public EventList<ArchiveErrorAsync> OnArchiveError { get; } = new EventList<ArchiveErrorAsync>();
-        public EventList<BeforeExtractAsync> OnBeforeExtract { get; } = new EventList<BeforeExtractAsync>();
-        public EventList<AfterExtractAsync> OnAfterExtract { get; } = new EventList<AfterExtractAsync>();
-        public EventList<BeforeExtractFileAsync> OnBeforeExtractFile { get; } = new EventList<BeforeExtractFileAsync>();
-        public EventList<AfterExtractFileAsync> OnAfterExtractFile { get; } = new EventList<AfterExtractFileAsync>();
-        public EventList<BeforeWriteDataAsync> OnBeforeWriteData { get; } = new EventList<BeforeWriteDataAsync>();
-        public EventList<AfterWriteDataAsync> OnAfterWriteData { get; } = new EventList<AfterWriteDataAsync>();
-        public EventList<BeforeWriteStreamAsync> OnBeforeWriteStream { get; } = new EventList<BeforeWriteStreamAsync>();
-        public EventList<AfterWriteStreamAsync> OnAfterWriteStream { get; } = new EventList<AfterWriteStreamAsync>();
-        public EventList<BeforeWriteContentAsync> OnBeforeWriteContent { get; } = new EventList<BeforeWriteContentAsync>();
-        public EventList<AfterWriteContentAsync> OnAfterWriteContent { get; } = new EventList<AfterWriteContentAsync>();
+        public EventList<BeforeRemoveThumbAsync> OnBeforeRemoveThumb { get; } = [];
+        public EventList<AfterRemoveThumbAsync> OnAfterRemoveThumb { get; } = [];
+        public EventList<RemoveThumbErrorAsync> OnRemoveThumbError { get; } = [];
+        public EventList<BeforeMakeDirAsync> OnBeforeMakeDir { get; } = [];
+        public EventList<AfterMakeDirAsync> OnAfterMakeDir { get; } = [];
+        public EventList<BeforeMakeFileAsync> OnBeforeMakeFile { get; } = [];
+        public EventList<AfterMakeFileAsync> OnAfterMakeFile { get; } = [];
+        public EventList<BeforeRenameAsync> OnBeforeRename { get; } = [];
+        public EventList<AfterRenameAsync> OnAfterRename { get; } = [];
+        public EventList<BeforeRemoveAsync> OnBeforeRemove { get; } = [];
+        public EventList<AfterRemoveAsync> OnAfterRemove { get; } = [];
+        public EventList<BeforeRollbackChunkAsync> OnBeforeRollbackChunk { get; } = [];
+        public EventList<AfterRollbackChunkAsync> OnAfterRollbackChunk { get; } = [];
+        public EventList<BeforeUploadAsync> OnBeforeUpload { get; } = [];
+        public EventList<AfterUploadAsync> OnAfterUpload { get; } = [];
+        public EventList<BeforeChunkMergedAsync> OnBeforeChunkMerged { get; } = [];
+        public EventList<AfterChunkMergedAsync> OnAfterChunkMerged { get; } = [];
+        public EventList<BeforeChunkTransferAsync> OnBeforeChunkTransfer { get; } = [];
+        public EventList<AfterChunkTransferAsync> OnAfterChunkTransfer { get; } = [];
+        public EventList<UploadErrorAsync> OnUploadError { get; } = [];
+        public EventList<BeforeMoveAsync> OnBeforeMove { get; } = [];
+        public EventList<AfterMoveAsync> OnAfterMove { get; } = [];
+        public EventList<BeforeCopyAsync> OnBeforeCopy { get; } = [];
+        public EventList<AfterCopyAsync> OnAfterCopy { get; } = [];
+        public EventList<BeforeArchiveAsync> OnBeforeArchive { get; } = [];
+        public EventList<AfterArchiveAsync> OnAfterArchive { get; } = [];
+        public EventList<ArchiveErrorAsync> OnArchiveError { get; } = [];
+        public EventList<BeforeExtractAsync> OnBeforeExtract { get; } = [];
+        public EventList<AfterExtractAsync> OnAfterExtract { get; } = [];
+        public EventList<BeforeExtractFileAsync> OnBeforeExtractFile { get; } = [];
+        public EventList<AfterExtractFileAsync> OnAfterExtractFile { get; } = [];
+        public EventList<BeforeWriteDataAsync> OnBeforeWriteData { get; } = [];
+        public EventList<AfterWriteDataAsync> OnAfterWriteData { get; } = [];
+        public EventList<BeforeWriteStreamAsync> OnBeforeWriteStream { get; } = [];
+        public EventList<AfterWriteStreamAsync> OnAfterWriteStream { get; } = [];
+        public EventList<BeforeWriteContentAsync> OnBeforeWriteContent { get; } = [];
+        public EventList<AfterWriteContentAsync> OnAfterWriteContent { get; } = [];
 
         public FileSystemDriver(IPathParser pathParser,
             IPictureEditor pictureEditor,
@@ -90,8 +89,7 @@ namespace elFinder.Net.Drivers.FileSystem
             ICryptographyProvider cryptographyProvider,
             IConnector connector,
             IConnectorManager connectorManager,
-            ITempFileCleaner tempFileCleaner)
-        {
+            ITempFileCleaner tempFileCleaner) {
             this.pathParser = pathParser;
             this.pictureEditor = pictureEditor;
             this.videoEditor = videoEditor;
@@ -104,8 +102,7 @@ namespace elFinder.Net.Drivers.FileSystem
             this.tempFileCleaner = tempFileCleaner;
         }
 
-        public virtual async Task<LsResponse> LsAsync(LsCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<LsResponse> LsAsync(LsCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var lsResp = new LsResponse();
@@ -114,11 +111,9 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.Directory.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-            foreach (var item in await targetPath.Directory.GetFilesAsync(cmd.Mimes, verify: true, filter: null, cancellationToken: cancellationToken))
-            {
+            foreach (var item in await targetPath.Directory.GetFilesAsync(cmd.Mimes, verify: true, filter: null, cancellationToken: cancellationToken)) {
                 string itemName = item.Name;
-                if (cmd.Intersect.Count > 0)
-                {
+                if (cmd.Intersect.Count > 0) {
                     itemName = cmd.Intersect.FirstOrDefault(intersectItem => intersectItem.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
                     if (itemName == null) continue;
                 }
@@ -127,11 +122,9 @@ namespace elFinder.Net.Drivers.FileSystem
                 lsResp.list[hash] = itemName;
             }
 
-            foreach (var item in await targetPath.Directory.GetDirectoriesAsync(cancellationToken: cancellationToken))
-            {
+            foreach (var item in await targetPath.Directory.GetDirectoriesAsync(cancellationToken: cancellationToken)) {
                 string itemName = item.Name;
-                if (cmd.Intersect.Count > 0)
-                {
+                if (cmd.Intersect.Count > 0) {
                     itemName = cmd.Intersect.FirstOrDefault(intersectItem => intersectItem.Equals(itemName, StringComparison.InvariantCultureIgnoreCase));
                     if (itemName == null) continue;
                 }
@@ -143,8 +136,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return lsResp;
         }
 
-        public virtual async Task<MkdirResponse> MkdirAsync(MkdirCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<MkdirResponse> MkdirAsync(MkdirCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!IsObjectNameValid(cmd.Name))
@@ -157,8 +149,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.Directory.CanCreateObject()) throw new PermissionDeniedException();
 
-            if (!string.IsNullOrEmpty(cmd.Name))
-            {
+            if (!string.IsNullOrEmpty(cmd.Name)) {
                 var newDir = new FileSystemDirectory(PathHelper.SafelyCombine(targetPath.Directory.FullName,
                     targetPath.Directory.FullName, cmd.Name), volume);
 
@@ -170,9 +161,8 @@ namespace elFinder.Net.Drivers.FileSystem
                 mkdirResp.added.Add(await newDir.ToFileInfoAsync(hash, targetHash, volume, connector.Options, cancellationToken: cancellationToken));
             }
 
-            foreach (string dir in cmd.Dirs)
-            {
-                string dirName = dir.StartsWith("/") ? dir.Substring(1) : dir;
+            foreach (string dir in cmd.Dirs) {
+                string dirName = dir.StartsWith('/') ? dir[1..] : dir;
                 var newDir = new FileSystemDirectory(PathHelper.SafelyCombine(targetPath.Directory.FullName,
                     targetPath.Directory.FullName, dirName), volume);
 
@@ -191,8 +181,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return mkdirResp;
         }
 
-        public virtual async Task<MkfileResponse> MkfileAsync(MkfileCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<MkfileResponse> MkfileAsync(MkfileCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!IsObjectNameValid(cmd.Name))
@@ -217,8 +206,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return mkfileResp;
         }
 
-        public virtual async Task<OpenResponse> OpenAsync(OpenCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<OpenResponse> OpenAsync(OpenCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             IVolume currentVolume = cmd.Volume;
@@ -230,32 +218,24 @@ namespace elFinder.Net.Drivers.FileSystem
             if (cmd.TargetPath?.Directory.ObjectAttribute.Read == false)
                 throw new PermissionDeniedException();
 
-            if (cmd.Init == 1)
-            {
-                if (targetPath == null)
-                {
+            if (cmd.Init == 1) {
+                if (targetPath == null) {
                     if (currentVolume.StartDirectory != null && !currentVolume.IsRoot(currentVolume.StartDirectory)
-                        && Directory.Exists(currentVolume.StartDirectory))
-                    {
+                        && Directory.Exists(currentVolume.StartDirectory)) {
                         cwd = new FileSystemDirectory(currentVolume.StartDirectory, currentVolume);
                     }
 
-                    if (cwd == null || !cwd.ObjectAttribute.Read)
-                    {
+                    if (cwd == null || !cwd.ObjectAttribute.Read) {
                         cwd = new FileSystemDirectory(currentVolume.RootDirectory, currentVolume);
                         cwdHash = cwd.GetHash(currentVolume, pathParser);
                         targetPath = new PathInfo(string.Empty, currentVolume, cwd, cwdHash);
-                    }
-                    else
-                    {
+                    } else {
                         cwdHash = cwd.GetHash(currentVolume, pathParser);
                         targetPath = new PathInfo(currentVolume.GetRelativePath(cwd), currentVolume, cwd, cwdHash);
                     }
 
                     cmd.TargetPath = targetPath;
-                }
-                else
-                {
+                } else {
                     cwd = targetPath.Directory;
                     cwdHash = targetPath.HashedTarget;
                 }
@@ -265,12 +245,9 @@ namespace elFinder.Net.Drivers.FileSystem
                     cwdHash, cwdParentHash, currentVolume, connector.Options, cancellationToken: cancellationToken);
 
                 InitResponse initResp;
-                if (fileInfo is RootInfoResponse rootInfo)
-                {
+                if (fileInfo is RootInfoResponse rootInfo) {
                     initResp = new InitResponse(rootInfo, rootInfo.options, cwd.Volume);
-                }
-                else
-                {
+                } else {
                     initResp = new InitResponse(fileInfo,
                         new ConnectorResponseOptions(cwd, connector.Options.DisabledUICommands, currentVolume.DirectorySeparatorChar),
                         cwd.Volume);
@@ -278,33 +255,26 @@ namespace elFinder.Net.Drivers.FileSystem
                 }
 
                 openResp = initResp;
-            }
-            else
-            {
+            } else {
                 cwd = targetPath.Directory;
                 cwdHash = cwd.GetHash(currentVolume, pathParser);
                 cwdParentHash = cwd.GetParentHash(currentVolume, pathParser);
                 var fileInfo = await cwd.ToFileInfoAsync(cwdHash, cwdParentHash, currentVolume, connector.Options, cancellationToken: cancellationToken);
 
-                if (fileInfo is RootInfoResponse rootInfo)
-                {
+                if (fileInfo is RootInfoResponse rootInfo) {
                     openResp = new OpenResponse(rootInfo, rootInfo.options, cwd.Volume);
-                }
-                else
-                {
+                } else {
                     openResp = new OpenResponse(fileInfo,
                         new ConnectorResponseOptions(cwd, connector.Options.DisabledUICommands, currentVolume.DirectorySeparatorChar),
                         cwd.Volume);
                 }
             }
 
-            foreach (var item in (await cwd.GetFilesAsync(cmd.Mimes, verify: true, filter: null, cancellationToken: cancellationToken)))
-            {
+            foreach (var item in (await cwd.GetFilesAsync(cmd.Mimes, verify: true, filter: null, cancellationToken: cancellationToken))) {
                 openResp.files.Add(await item.ToFileInfoAsync(cwdHash, currentVolume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
             }
 
-            foreach (var item in (await cwd.GetDirectoriesAsync(cancellationToken: cancellationToken)))
-            {
+            foreach (var item in (await cwd.GetDirectoriesAsync(cancellationToken: cancellationToken))) {
                 var hash = item.GetHash(currentVolume, pathParser);
                 openResp.files.Add(await item.ToFileInfoAsync(hash, cwdHash, currentVolume, connector.Options, cancellationToken: cancellationToken));
             }
@@ -312,31 +282,26 @@ namespace elFinder.Net.Drivers.FileSystem
             return openResp;
         }
 
-        public virtual async Task<InfoResponse> InfoAsync(InfoCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<InfoResponse> InfoAsync(InfoCommand cmd, CancellationToken cancellationToken = default) {
             var infoResp = new InfoResponse();
             var volume = cmd.TargetPaths.Select(p => p.Volume).First();
 
-            foreach (var target in cmd.TargetPaths)
-            {
+            foreach (var target in cmd.TargetPaths) {
                 var targetHash = target.HashedTarget;
                 var phash = target.FileSystem.GetParentHash(volume, pathParser);
 
-                try
-                {
+                try {
                     if (target.IsDirectory)
                         infoResp.files.Add(await target.Directory.ToFileInfoAsync(targetHash, phash, volume, connector.Options, cancellationToken: cancellationToken));
                     else
                         infoResp.files.Add(await target.File.ToFileInfoAsync(phash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
-                }
-                catch (Exception) { }
+                } catch (Exception) { }
             }
 
             return infoResp;
         }
 
-        public virtual async Task<ParentsResponse> ParentsAsync(ParentsCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ParentsResponse> ParentsAsync(ParentsCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var parentsResp = new ParentsResponse();
@@ -345,12 +310,9 @@ namespace elFinder.Net.Drivers.FileSystem
             var volume = targetPath.Volume;
             var targetHash = targetPath.HashedTarget;
 
-            if (targetPath.IsRoot)
-            {
+            if (targetPath.IsRoot) {
                 parentsResp.tree.Add(await targetDir.ToFileInfoAsync(targetHash, null, volume, connector.Options, cancellationToken: cancellationToken));
-            }
-            else
-            {
+            } else {
                 await AddParentsToListAsync(targetPath, parentsResp.tree, cancellationToken: cancellationToken);
             }
 
@@ -358,8 +320,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         public virtual Task<PathInfo> ParsePathAsync(string decodedPath, IVolume volume, string hashedTarget,
-            bool createIfNotExists = true, bool fileByDefault = true, CancellationToken cancellationToken = default)
-        {
+            bool createIfNotExists = true, bool fileByDefault = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var fullPath = volume.RootDirectory + decodedPath;
@@ -375,8 +336,7 @@ namespace elFinder.Net.Drivers.FileSystem
             throw new DirectoryNotFoundException();
         }
 
-        public virtual async Task<RenameResponse> RenameAsync(RenameCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<RenameResponse> RenameAsync(RenameCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var renameResp = new RenameResponse();
@@ -390,8 +350,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
             await RemoveThumbsAsync(targetPath, cancellationToken: cancellationToken);
 
-            if (targetPath.IsDirectory)
-            {
+            if (targetPath.IsDirectory) {
                 var prevName = targetPath.Directory.Name;
 
                 await OnBeforeRename.SafeInvokeAsync(targetPath.Directory, cmd.Name);
@@ -401,9 +360,7 @@ namespace elFinder.Net.Drivers.FileSystem
                 var hash = renamedDir.GetHash(volume, pathParser);
                 var phash = renamedDir.GetParentHash(volume, pathParser);
                 renameResp.added.Add(await renamedDir.ToFileInfoAsync(hash, phash, volume, connector.Options, cancellationToken: cancellationToken));
-            }
-            else
-            {
+            } else {
                 var prevName = targetPath.File.Name;
 
                 await OnBeforeRename.SafeInvokeAsync(targetPath.File, cmd.Name);
@@ -419,27 +376,21 @@ namespace elFinder.Net.Drivers.FileSystem
             return renameResp;
         }
 
-        public virtual async Task<RmResponse> RmAsync(RmCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<RmResponse> RmAsync(RmCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var rmResp = new RmResponse();
 
-            foreach (var path in cmd.TargetPaths)
-            {
+            foreach (var path in cmd.TargetPaths) {
                 await RemoveThumbsAsync(path, cancellationToken: cancellationToken);
 
-                if (path.IsDirectory)
-                {
-                    if (await path.Directory.ExistsAsync)
-                    {
+                if (path.IsDirectory) {
+                    if (await path.Directory.ExistsAsync) {
                         await OnBeforeRemove.SafeInvokeAsync(path.Directory);
                         await path.Directory.DeleteAsync(cancellationToken: cancellationToken);
                         await OnAfterRemove.SafeInvokeAsync(path.Directory);
                     }
-                }
-                else if (await path.File.ExistsAsync)
-                {
+                } else if (await path.File.ExistsAsync) {
                     await OnBeforeRemove.SafeInvokeAsync(path.File);
                     await path.File.DeleteAsync(cancellationToken: cancellationToken);
                     await OnAfterRemove.SafeInvokeAsync(path.File);
@@ -451,12 +402,10 @@ namespace elFinder.Net.Drivers.FileSystem
             return rmResp;
         }
 
-        public virtual Task SetupVolumeAsync(IVolume volume, CancellationToken cancellationToken = default)
-        {
+        public virtual Task SetupVolumeAsync(IVolume volume, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            Action<string> CreateAndHideDirectory = (str) =>
-            {
+            Action<string> CreateAndHideDirectory = (str) => {
                 var dir = new DirectoryInfo(str);
 
                 if (!dir.Exists)
@@ -466,49 +415,41 @@ namespace elFinder.Net.Drivers.FileSystem
                     dir.Attributes = FileAttributes.Hidden;
             };
 
-            if (volume.ThumbnailDirectory != null)
-            {
+            if (volume.ThumbnailDirectory != null) {
                 CreateAndHideDirectory(volume.ThumbnailDirectory);
             }
 
-            if (volume.TempDirectory != null)
-            {
+            if (volume.TempDirectory != null) {
                 CreateAndHideDirectory(volume.TempDirectory);
             }
 
-            if (volume.TempArchiveDirectory != null)
-            {
+            if (volume.TempArchiveDirectory != null) {
                 CreateAndHideDirectory(volume.TempArchiveDirectory);
             }
 
-            if (volume.ChunkDirectory != null)
-            {
+            if (volume.ChunkDirectory != null) {
                 CreateAndHideDirectory(volume.ChunkDirectory);
             }
 
-            if (!Directory.Exists(volume.RootDirectory))
-            {
+            if (!Directory.Exists(volume.RootDirectory)) {
                 Directory.CreateDirectory(volume.RootDirectory);
             }
 
             return Task.CompletedTask;
         }
 
-        public virtual async Task<TmbResponse> TmbAsync(TmbCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<TmbResponse> TmbAsync(TmbCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var tmbResp = new TmbResponse();
             var volume = cmd.TargetPaths.Select(p => p.Volume).First();
 
-            foreach (var target in cmd.TargetPaths)
-            {
+            foreach (var target in cmd.TargetPaths) {
                 if (target.IsDirectory) return null;
 
                 var (thumb, _, _) = await CreateThumbAsync(target.File, cancellationToken: cancellationToken);
 
-                if (thumb != null)
-                {
+                if (thumb != null) {
                     using (thumb) { }
                 }
 
@@ -518,8 +459,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return tmbResp;
         }
 
-        public virtual async Task<UploadResponse> UploadAsync(UploadCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<UploadResponse> UploadAsync(UploadCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (cmd.Name.Any(name => !IsObjectNameValid(name)))
@@ -548,15 +488,12 @@ namespace elFinder.Net.Drivers.FileSystem
             var warningDetails = uploadResp.GetWarningDetails();
             var setNewParents = new HashSet<IDirectory>();
 
-            if (isFinalUploading)
-            {
-                foreach (var uploadPath in cmd.UploadPathInfos.Distinct())
-                {
+            if (isFinalUploading) {
+                foreach (var uploadPath in cmd.UploadPathInfos.Distinct()) {
                     var directory = uploadPath.Directory;
                     string lastParentHash = null;
 
-                    while (!volume.IsRoot(directory))
-                    {
+                    while (!volume.IsRoot(directory)) {
                         var hash = lastParentHash ?? directory.GetHash(volume, pathParser);
                         lastParentHash = directory.GetParentHash(volume, pathParser);
 
@@ -568,13 +505,11 @@ namespace elFinder.Net.Drivers.FileSystem
                 }
             }
 
-            if (isChunkMerge)
-            {
+            if (isChunkMerge) {
                 FileSystemDirectory chunkingDir = null;
                 FileSystemFile uploadFileInfo = null;
 
-                try
-                {
+                try {
                     string uploadingFileName = Path.GetFileName(cmd.UploadName);
                     string chunkMergeName = Path.GetFileName(cmd.Chunk);
 
@@ -594,10 +529,8 @@ namespace elFinder.Net.Drivers.FileSystem
                     uploadFileInfo = new FileSystemFile(uploadFullName, volume);
                     var isOverwrite = false;
 
-                    if (await uploadFileInfo.ExistsAsync)
-                    {
-                        if (cmd.Renames.Contains(uploadingFileName))
-                        {
+                    if (await uploadFileInfo.ExistsAsync) {
+                        if (cmd.Renames.Contains(uploadingFileName)) {
                             var fileNameWithoutExt = Path.GetFileNameWithoutExtension(uploadingFileName);
                             var ext = Path.GetExtension(uploadingFileName);
                             var backupName = $"{fileNameWithoutExt}{cmd.Suffix}{ext}";
@@ -614,24 +547,17 @@ namespace elFinder.Net.Drivers.FileSystem
 
                             uploadResp.added.Add(await uploadFileInfo.ToFileInfoAsync(uploadDirHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
                             uploadFileInfo = new FileSystemFile(uploadFullName, volume);
-                        }
-                        else if (cmd.Overwrite == 0 || (cmd.Overwrite == null && !volume.UploadOverwrite))
-                        {
+                        } else if (cmd.Overwrite == 0 || (cmd.Overwrite == null && !volume.UploadOverwrite)) {
                             string newName = await uploadFileInfo.GetCopyNameAsync(cmd.Suffix, cancellationToken: cancellationToken);
                             uploadFullName = PathHelper.SafelyCombine(uploadFileInfo.DirectoryName, uploadFileInfo.DirectoryName, newName);
                             uploadFileInfo = new FileSystemFile(uploadFullName, volume);
                             isOverwrite = false;
-                        }
-                        else if (!uploadFileInfo.ObjectAttribute.Write)
+                        } else if (!uploadFileInfo.ObjectAttribute.Write)
                             throw new PermissionDeniedException();
                         else isOverwrite = true;
                     }
 
-                    var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(chunkingDir.FullName);
-
-                    if (chunkedUploadInfo == null)
-                        throw new ConnectionAbortedException();
-
+                    var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(chunkingDir.FullName) ?? throw new ConnectionAbortedException();
                     await OnBeforeChunkMerged.SafeInvokeAsync(uploadFileInfo, isOverwrite);
                     chunkedUploadInfo.IsFileTouched = true;
                     await MergeChunksAsync(uploadFileInfo, chunkingDir, isOverwrite, cancellationToken: cancellationToken);
@@ -641,102 +567,81 @@ namespace elFinder.Net.Drivers.FileSystem
 
                     await uploadFileInfo.RefreshAsync(cancellationToken);
                     uploadResp.added.Add(await uploadFileInfo.ToFileInfoAsync(uploadDirHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(chunkingDir.FullName);
 
-                    if (chunkedUploadInfo != null)
-                    {
-                        lock (chunkedUploadInfo)
-                        {
+                    if (chunkedUploadInfo != null) {
+                        lock (chunkedUploadInfo) {
                             chunkedUploadInfo.Exception = ex.GetRootCause();
 
-                            if (chunkingDir != null)
-                            {
-                                chunkingDir.RefreshAsync().Wait();
+                            if (chunkingDir != null) {
+                                chunkingDir.RefreshAsync(cancellationToken).Wait(cancellationToken);
 
-                                if (chunkingDir.ExistsAsync.Result)
-                                {
-                                    OnBeforeRollbackChunk.SafeInvokeAsync(chunkingDir).Wait();
-                                    OnBeforeRemove.SafeInvokeAsync(chunkingDir).Wait();
-                                    chunkingDir.DeleteAsync().Wait();
-                                    OnAfterRemove.SafeInvokeAsync(chunkingDir).Wait();
-                                    OnAfterRollbackChunk.SafeInvokeAsync(chunkingDir).Wait();
+                                if (chunkingDir.ExistsAsync.Result) {
+                                    OnBeforeRollbackChunk.SafeInvokeAsync(chunkingDir).Wait(cancellationToken);
+                                    OnBeforeRemove.SafeInvokeAsync(chunkingDir).Wait(cancellationToken);
+                                    chunkingDir.DeleteAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                                    OnAfterRemove.SafeInvokeAsync(chunkingDir).Wait(cancellationToken);
+                                    OnAfterRollbackChunk.SafeInvokeAsync(chunkingDir).Wait(cancellationToken);
                                 }
                             }
 
-                            if (uploadFileInfo != null && chunkedUploadInfo.IsFileTouched)
-                            {
-                                uploadFileInfo.RefreshAsync().Wait();
+                            if (uploadFileInfo != null && chunkedUploadInfo.IsFileTouched) {
+                                uploadFileInfo.RefreshAsync(cancellationToken).Wait(cancellationToken);
 
-                                if (uploadFileInfo.ExistsAsync.Result)
-                                {
-                                    OnBeforeRollbackChunk.SafeInvokeAsync(uploadFileInfo).Wait();
-                                    OnBeforeRemove.SafeInvokeAsync(uploadFileInfo).Wait();
-                                    uploadFileInfo.DeleteAsync().Wait();
-                                    OnAfterRemove.SafeInvokeAsync(uploadFileInfo).Wait();
-                                    OnAfterRollbackChunk.SafeInvokeAsync(uploadFileInfo).Wait();
+                                if (uploadFileInfo.ExistsAsync.Result) {
+                                    OnBeforeRollbackChunk.SafeInvokeAsync(uploadFileInfo).Wait(cancellationToken);
+                                    OnBeforeRemove.SafeInvokeAsync(uploadFileInfo).Wait(cancellationToken);
+                                    uploadFileInfo.DeleteAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                                    OnAfterRemove.SafeInvokeAsync(uploadFileInfo).Wait(cancellationToken);
+                                    OnAfterRollbackChunk.SafeInvokeAsync(uploadFileInfo).Wait(cancellationToken);
                                 }
                             }
                         }
                     }
 
                     await OnUploadError.SafeInvokeAsync(ex);
-                    throw ex;
+                    throw;
                 }
-            }
-            else
-            {
+            } else {
                 var uploadCount = cmd.Upload.Count();
-                for (var idx = 0; idx < uploadCount; idx++)
-                {
+                for (var idx = 0; idx < uploadCount; idx++) {
                     var formFile = cmd.Upload.ElementAt(idx);
                     IDirectory dest = null;
                     IDirectory finalDest = null;
                     string destHash = null;
                     string uploadingFileName = "unknown", cleanFileName;
 
-                    try
-                    {
+                    try {
                         (string UploadFileName, int CurrentChunkNo, int TotalChunks)? chunkInfo = null;
 
-                        if (isChunking)
-                        {
+                        if (isChunking) {
                             chunkInfo = cmd.ChunkInfo;
                             uploadingFileName = Path.GetFileName(chunkInfo.Value.UploadFileName);
                             cleanFileName = Path.GetFileName(cmd.Chunk);
-                        }
-                        else
-                        {
+                        } else {
                             uploadingFileName = Path.GetFileName(formFile.FileName);
                             cleanFileName = uploadingFileName;
                         }
 
-                        if (volume.UploadOrder != null)
-                        {
+                        if (volume.UploadOrder != null) {
                             var mimeType = MimeHelper.GetMimeType(Path.GetExtension(uploadingFileName));
-                            var constraintMap = new Dictionary<UploadConstraintType, IEnumerable<string>>
-                            {
+                            var constraintMap = new Dictionary<UploadConstraintType, IEnumerable<string>> {
                                 [UploadConstraintType.Allow] = volume.UploadAllow,
                                 [UploadConstraintType.Deny] = volume.UploadDeny,
                             };
 
-                            foreach (var constraintType in volume.UploadOrder)
-                            {
+                            foreach (var constraintType in volume.UploadOrder) {
                                 var constraint = constraintMap[constraintType];
                                 if (constraint == null) continue;
-                                switch (constraintType)
-                                {
-                                    case UploadConstraintType.Allow:
-                                        {
+                                switch (constraintType) {
+                                    case UploadConstraintType.Allow: {
                                             if (!constraint.Contains(UploadConstants.UploadConstraintAllValue)
                                                 && !constraint.Contains(mimeType)
                                                 && !constraint.Contains(mimeType.Type)) throw new FileTypeNotAllowException();
                                             break;
                                         }
-                                    case UploadConstraintType.Deny:
-                                        {
+                                    case UploadConstraintType.Deny: {
                                             if (constraint.Contains(UploadConstants.UploadConstraintAllValue)
                                                 || constraint.Contains(mimeType)
                                                 || constraint.Contains(mimeType.Type)) throw new FileTypeNotAllowException();
@@ -746,32 +651,23 @@ namespace elFinder.Net.Drivers.FileSystem
                             }
                         }
 
-                        if (cmd.UploadPath.Count > idx)
-                        {
-                            if (isFinalUploading)
-                            {
+                        if (cmd.UploadPath.Count > idx) {
+                            if (isFinalUploading) {
                                 dest = cmd.UploadPathInfos.ElementAt(idx).Directory;
                                 finalDest = dest;
                                 destHash = cmd.UploadPath[idx];
-                            }
-                            else
-                            {
+                            } else {
                                 finalDest = cmd.UploadPathInfos.ElementAt(idx).Directory;
                                 var tempDest = GetChunkDirectory(finalDest, uploadingFileName, cmd.Cid);
                                 dest = new FileSystemDirectory(tempDest, volume);
                                 destHash = cmd.UploadPath[idx];
                             }
-                        }
-                        else
-                        {
-                            if (isFinalUploading)
-                            {
+                        } else {
+                            if (isFinalUploading) {
                                 dest = targetPath.Directory;
                                 finalDest = dest;
                                 destHash = targetPath.HashedTarget;
-                            }
-                            else
-                            {
+                            } else {
                                 finalDest = targetPath.Directory;
                                 var tempDest = GetChunkDirectory(finalDest, uploadingFileName, cmd.Cid);
                                 dest = new FileSystemDirectory(tempDest, volume);
@@ -779,23 +675,20 @@ namespace elFinder.Net.Drivers.FileSystem
                             }
                         }
 
-                        if (isChunking)
-                        {
+                        if (isChunking) {
                             var chunkedUploadInfo = connectorManager.GetLock(dest.FullName, _ => new ChunkedUploadInfo());
-                            lock (chunkedUploadInfo)
-                            {
+                            lock (chunkedUploadInfo) {
                                 if (chunkedUploadInfo.Exception != null) throw chunkedUploadInfo.Exception;
 
-                                if (!dest.ExistsAsync.Result)
-                                {
+                                if (!dest.ExistsAsync.Result) {
                                     if (!dest.CanCreate()) throw new PermissionDeniedException();
 
                                     chunkedUploadInfo.TotalUploaded = 0;
-                                    OnBeforeMakeDir.SafeInvokeAsync(dest).Wait();
-                                    dest.CreateAsync(cancellationToken: cancellationToken).Wait();
-                                    OnAfterMakeDir.SafeInvokeAsync(dest).Wait();
+                                    OnBeforeMakeDir.SafeInvokeAsync(dest).Wait(cancellationToken);
+                                    dest.CreateAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                                    OnAfterMakeDir.SafeInvokeAsync(dest).Wait(cancellationToken);
 
-                                    WriteStatusFileAsync(dest).Wait();
+                                    WriteStatusFileAsync(dest).Wait(cancellationToken);
                                 }
                             }
                         }
@@ -809,15 +702,12 @@ namespace elFinder.Net.Drivers.FileSystem
                         var finalUploadFileInfo = isChunking ? new FileSystemFile(finalUploadFullName, volume) : uploadFileInfo;
                         var isOverwrite = false;
 
-                        if (!isFinalUploading && await uploadFileInfo.ExistsAsync)
-                        {
+                        if (!isFinalUploading && await uploadFileInfo.ExistsAsync) {
                             throw new PermissionDeniedException();
                         }
 
-                        if (await finalUploadFileInfo.ExistsAsync)
-                        {
-                            if (cmd.Renames.Contains(uploadingFileName))
-                            {
+                        if (await finalUploadFileInfo.ExistsAsync) {
+                            if (cmd.Renames.Contains(uploadingFileName)) {
                                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(uploadingFileName);
                                 var ext = Path.GetExtension(uploadingFileName);
                                 var backupName = $"{fileNameWithoutExt}{cmd.Suffix}{ext}";
@@ -834,90 +724,71 @@ namespace elFinder.Net.Drivers.FileSystem
 
                                 uploadResp.added.Add(await finalUploadFileInfo.ToFileInfoAsync(destHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
                                 finalUploadFileInfo = new FileSystemFile(finalUploadFullName, volume);
-                            }
-                            else if (cmd.Overwrite == 0 || (cmd.Overwrite == null && !volume.UploadOverwrite))
-                            {
+                            } else if (cmd.Overwrite == 0 || (cmd.Overwrite == null && !volume.UploadOverwrite)) {
                                 string newName = await finalUploadFileInfo.GetCopyNameAsync(cmd.Suffix, cancellationToken: cancellationToken);
                                 finalUploadFullName = PathHelper.SafelyCombine(finalUploadFileInfo.DirectoryName, finalUploadFileInfo.DirectoryName, newName);
                                 finalUploadFileInfo = new FileSystemFile(finalUploadFullName, volume);
                                 isOverwrite = false;
-                            }
-                            else if (!finalUploadFileInfo.ObjectAttribute.Write)
+                            } else if (!finalUploadFileInfo.ObjectAttribute.Write)
                                 throw new PermissionDeniedException();
                             else isOverwrite = true;
                         }
 
                         uploadFileInfo = isChunking ? uploadFileInfo : finalUploadFileInfo;
 
-                        if (isChunking)
-                        {
+                        if (isChunking) {
                             await WriteStatusFileAsync(dest);
                         }
 
                         await OnBeforeUpload.SafeInvokeAsync(uploadFileInfo, finalUploadFileInfo, formFile, isOverwrite, isChunking);
-                        using (var fileStream = await uploadFileInfo.OpenWriteAsync(cancellationToken: cancellationToken))
-                        {
+                        using (var fileStream = await uploadFileInfo.OpenWriteAsync(cancellationToken: cancellationToken)) {
                             await formFile.CopyToAsync(fileStream, cancellationToken: cancellationToken);
                         }
                         await OnAfterUpload.SafeInvokeAsync(uploadFileInfo, finalUploadFileInfo, formFile, isOverwrite, isChunking);
 
-                        if (isFinalUploading)
-                        {
+                        if (isFinalUploading) {
                             await finalUploadFileInfo.RefreshAsync(cancellationToken);
                             uploadResp.added.Add(await finalUploadFileInfo.ToFileInfoAsync(destHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
-                        }
-                        else
-                        {
+                        } else {
                             var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(dest.FullName);
 
-                            if (chunkedUploadInfo != null)
-                            {
-                                lock (chunkedUploadInfo)
-                                {
+                            if (chunkedUploadInfo != null) {
+                                lock (chunkedUploadInfo) {
                                     if (chunkedUploadInfo.Exception != null) throw chunkedUploadInfo.Exception;
 
                                     chunkedUploadInfo.TotalUploaded++;
 
-                                    if (chunkedUploadInfo.TotalUploaded == cmd.ChunkInfo.TotalChunks)
-                                    {
+                                    if (chunkedUploadInfo.TotalUploaded == cmd.ChunkInfo.TotalChunks) {
                                         uploadResp._chunkmerged = dest.Name;
                                         uploadResp._name = uploadingFileName;
                                     }
                                 }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         var rootCause = ex.GetRootCause();
 
-                        if (isChunking && dest != null)
-                        {
+                        if (isChunking && dest != null) {
                             var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(dest.FullName);
                             var isExceptionReturned = false;
 
-                            if (chunkedUploadInfo != null)
-                            {
-                                lock (chunkedUploadInfo)
-                                {
+                            if (chunkedUploadInfo != null) {
+                                lock (chunkedUploadInfo) {
                                     isExceptionReturned = chunkedUploadInfo.Exception != null;
 
-                                    if (!isExceptionReturned)
-                                    {
+                                    if (!isExceptionReturned) {
                                         chunkedUploadInfo.Exception = rootCause;
                                     }
 
-                                    if (dest != null)
-                                    {
-                                        dest.RefreshAsync().Wait();
+                                    if (dest != null) {
+                                        dest.RefreshAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
 
-                                        if (dest.ExistsAsync.Result)
-                                        {
-                                            OnBeforeRollbackChunk.SafeInvokeAsync(dest).Wait();
-                                            OnBeforeRemove.SafeInvokeAsync(dest).Wait();
-                                            dest.DeleteAsync().Wait();
-                                            OnAfterRemove.SafeInvokeAsync(dest).Wait();
-                                            OnAfterRollbackChunk.SafeInvokeAsync(dest).Wait();
+                                        if (dest.ExistsAsync.Result) {
+                                            OnBeforeRollbackChunk.SafeInvokeAsync(dest).Wait(cancellationToken);
+                                            OnBeforeRemove.SafeInvokeAsync(dest).Wait(cancellationToken);
+                                            dest.DeleteAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                                            OnAfterRemove.SafeInvokeAsync(dest).Wait(cancellationToken);
+                                            OnAfterRollbackChunk.SafeInvokeAsync(dest).Wait(cancellationToken);
                                         }
                                     }
                                 }
@@ -926,22 +797,17 @@ namespace elFinder.Net.Drivers.FileSystem
                             if (isExceptionReturned) return new UploadResponse();
 
                             await OnUploadError.SafeInvokeAsync(ex);
-                            throw ex;
+                            throw;
                         }
 
                         await OnUploadError.SafeInvokeAsync(ex);
 
-                        if (rootCause is PermissionDeniedException pEx)
-                        {
+                        if (rootCause is PermissionDeniedException pEx) {
                             warning.Add(string.IsNullOrEmpty(pEx.Message) ? $"Permission denied: {uploadingFileName}" : pEx.Message);
                             warningDetails.Add(ErrorResponse.Factory.UploadFile(pEx, uploadingFileName));
-                        }
-                        else if (rootCause is FileTypeNotAllowException fileTypeEx)
-                        {
+                        } else if (rootCause is FileTypeNotAllowException fileTypeEx) {
                             throw fileTypeEx;
-                        }
-                        else
-                        {
+                        } else {
                             warning.Add($"Failed to upload: {uploadingFileName}");
                             warningDetails.Add(ErrorResponse.Factory.UploadFile(ex, uploadingFileName));
                         }
@@ -952,8 +818,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return uploadResp;
         }
 
-        public Task AbortUploadAsync(UploadCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public Task AbortUploadAsync(UploadCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (cmd.Name.Any(name => !IsObjectNameValid(name)))
@@ -979,7 +844,6 @@ namespace elFinder.Net.Drivers.FileSystem
 
             var targetPath = cmd.TargetPath;
             var volume = targetPath.Volume;
-            IDirectory dest = null;
 
             (string UploadFileName, int CurrentChunkNo, int TotalChunks)? chunkInfo = null;
             string uploadingFileName, cleanFileName;
@@ -990,14 +854,12 @@ namespace elFinder.Net.Drivers.FileSystem
 
             var uploadDir = cmd.UploadPathInfos.FirstOrDefault()?.Directory ?? cmd.TargetPath.Directory;
             var tempDest = GetChunkDirectory(uploadDir, uploadingFileName, cmd.Cid);
-            dest = new FileSystemDirectory(tempDest, volume);
+            var dest = new FileSystemDirectory(tempDest, volume);
 
             var chunkedUploadInfo = connectorManager.GetLock<ChunkedUploadInfo>(dest.FullName);
 
-            if (chunkedUploadInfo != null)
-            {
-                lock (chunkedUploadInfo)
-                {
+            if (chunkedUploadInfo != null) {
+                lock (chunkedUploadInfo) {
                     chunkedUploadInfo.Exception = new ConnectionAbortedException();
 
                     if (!dest.ExistsAsync.Result)
@@ -1006,17 +868,16 @@ namespace elFinder.Net.Drivers.FileSystem
                     if (!dest.CanDelete())
                         throw new PermissionDeniedException($"Permission denied: {volume.GetRelativePath(dest)}");
 
-                    OnBeforeRemove.SafeInvokeAsync(dest).Wait();
-                    dest.DeleteAsync(cancellationToken: cancellationToken).Wait();
-                    OnAfterRemove.SafeInvokeAsync(dest).Wait();
+                    OnBeforeRemove.SafeInvokeAsync(dest).Wait(cancellationToken);
+                    dest.DeleteAsync(cancellationToken: cancellationToken).Wait(cancellationToken);
+                    OnAfterRemove.SafeInvokeAsync(dest).Wait(cancellationToken);
                 }
             }
 
             return Task.CompletedTask;
         }
 
-        public virtual async Task<TreeResponse> TreeAsync(TreeCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<TreeResponse> TreeAsync(TreeCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var treeResp = new TreeResponse();
@@ -1025,8 +886,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.Directory.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-            foreach (var item in await targetPath.Directory.GetDirectoriesAsync(cancellationToken: cancellationToken))
-            {
+            foreach (var item in await targetPath.Directory.GetDirectoriesAsync(cancellationToken: cancellationToken)) {
                 var hash = item.GetHash(volume, pathParser);
                 treeResp.tree.Add(await item.ToFileInfoAsync(hash, targetPath.HashedTarget, volume, connector.Options, cancellationToken: cancellationToken));
             }
@@ -1034,27 +894,22 @@ namespace elFinder.Net.Drivers.FileSystem
             return treeResp;
         }
 
-        public virtual async Task<SizeResponse> SizeAsync(SizeCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<SizeResponse> SizeAsync(SizeCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var sizeResp = new SizeResponse();
 
-            foreach (var path in cmd.TargetPaths)
-            {
+            foreach (var path in cmd.TargetPaths) {
                 if (!path.FileSystem.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-                if (path.IsDirectory)
-                {
+                if (path.IsDirectory) {
                     sizeResp.dirCnt++;
 
                     var sizeAndCount = await path.Directory.GetSizeAndCountAsync(cancellationToken: cancellationToken);
                     sizeResp.dirCnt += sizeAndCount.DirectoryCount;
                     sizeResp.fileCnt += sizeAndCount.FileCount;
                     sizeResp.size += sizeAndCount.Size;
-                }
-                else
-                {
+                } else {
                     sizeResp.fileCnt++;
                     sizeResp.size += await path.File.LengthAsync;
                 }
@@ -1063,23 +918,19 @@ namespace elFinder.Net.Drivers.FileSystem
             return sizeResp;
         }
 
-        public virtual async Task<DimResponse> DimAsync(DimCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<DimResponse> DimAsync(DimCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var file = cmd.TargetPath.File;
 
             if (!file.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-            using (var stream = await file.OpenReadAsync(cancellationToken: cancellationToken))
-            {
-                var size = pictureEditor.ImageSize(stream);
-                return new DimResponse(size);
-            }
+            using var stream = await file.OpenReadAsync(cancellationToken: cancellationToken);
+            var size = pictureEditor.ImageSize(stream);
+            return new DimResponse(size);
         }
 
-        public virtual async Task<FileResponse> FileAsync(FileCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<FileResponse> FileAsync(FileCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var targetPath = cmd.TargetPath;
@@ -1087,8 +938,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!file.CanDownload()) throw new PermissionDeniedException();
 
-            return new FileResponse
-            {
+            return new FileResponse {
                 ContentType = MimeHelper.GetMimeType(file.Extension),
                 FileStream = await file.OpenReadAsync(cancellationToken: cancellationToken),
                 FileDownloadName = file.Name,
@@ -1096,8 +946,7 @@ namespace elFinder.Net.Drivers.FileSystem
             };
         }
 
-        public virtual async Task<GetResponse> GetAsync(GetCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<GetResponse> GetAsync(GetCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var response = new GetResponse();
@@ -1107,13 +956,11 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.File.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-            try
-            {
+            try {
                 var baseStream = await targetPath.File.OpenReadAsync(cancellationToken: cancellationToken);
                 var reader = autoConv ? new StreamReader(baseStream, true) :
                     new StreamReader(baseStream, Encoding.GetEncoding(conv));
-                using (reader)
-                {
+                using (reader) {
                     response.content = await GetInlineContentAsync(targetPath.File, reader, cancellationToken: cancellationToken);
                     response.doconv = null;
 
@@ -1121,14 +968,11 @@ namespace elFinder.Net.Drivers.FileSystem
                     if (response.encoding.Equals(Encoding.UTF8.WebName, StringComparison.InvariantCultureIgnoreCase))
                         response.encoding = null;
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 response.SetException(ex);
 
                 if (ex is NotSupportedException || ex is ArgumentException)
-                    switch (cmd.Conv)
-                    {
+                    switch (cmd.Conv) {
                         case "1":
                             response.content = false;
                             break;
@@ -1138,15 +982,13 @@ namespace elFinder.Net.Drivers.FileSystem
                         default:
                             response.encoding = conv;
                             break;
-                    }
-                else throw ex;
+                    } else throw;
             }
 
             return response;
         }
 
-        public virtual async Task<PasteResponse> PasteAsync(PasteCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<PasteResponse> PasteAsync(PasteCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (cmd.Renames.Any(name => !IsObjectNameValid(name)))
@@ -1161,17 +1003,14 @@ namespace elFinder.Net.Drivers.FileSystem
             var dstVolume = dstPath.Volume;
             var copyOverwrite = dstPath.Volume.CopyOverwrite;
 
-            foreach (var src in cmd.TargetPaths)
-            {
-                if (src.IsDirectory)
-                {
+            foreach (var src in cmd.TargetPaths) {
+                if (src.IsDirectory) {
                     IDirectory pastedDir;
                     var newDest = PathHelper.SafelyCombine(dstPath.Directory.FullName, dstPath.Directory.FullName, src.Directory.Name);
                     var newDestDir = new FileSystemDirectory(newDest, dstPath.Volume);
                     var exists = await newDestDir.ExistsAsync;
 
-                    if (exists && cmd.Renames.Contains(newDestDir.Name))
-                    {
+                    if (exists && cmd.Renames.Contains(newDestDir.Name)) {
                         var backupName = $"{newDestDir.Name}{cmd.Suffix}";
                         var fullBakName = PathHelper.SafelyCombine(newDestDir.Parent.FullName, newDestDir.Parent.FullName, backupName);
                         var bakDir = new FileSystemDirectory(fullBakName, newDestDir.Volume);
@@ -1191,51 +1030,41 @@ namespace elFinder.Net.Drivers.FileSystem
                         exists = false;
                     }
 
-                    if (isCut)
-                    {
+                    if (isCut) {
                         await RemoveThumbsAsync(src, cancellationToken: cancellationToken);
 
-                        if (exists)
-                        {
+                        if (exists) {
                             await OnBeforeMove.SafeInvokeAsync(src.Directory, newDest, true);
                             pastedDir = await MergeAsync(src.Directory, newDest, dstVolume, copyOverwrite, cancellationToken: cancellationToken);
                             await OnBeforeRemove.SafeInvokeAsync(src.Directory);
                             await src.Directory.DeleteAsync(cancellationToken: cancellationToken);
                             await OnAfterRemove.SafeInvokeAsync(src.Directory);
                             await OnAfterMove.SafeInvokeAsync(src.Directory, pastedDir, true);
-                        }
-                        else
-                        {
+                        } else {
                             await OnBeforeMove.SafeInvokeAsync(src.Directory, newDest, false);
                             pastedDir = await src.Directory.MoveToAsync(newDest, dstVolume, cancellationToken: cancellationToken);
                             await OnAfterMove.SafeInvokeAsync(src.Directory, pastedDir, false);
                         }
 
                         pasteResp.removed.Add(src.HashedTarget);
-                    }
-                    else
-                    {
+                    } else {
                         await OnBeforeCopy.SafeInvokeAsync(src.Directory, newDest, true);
                         pastedDir = await CopyToAsync(src.Directory, newDest, dstVolume, copyOverwrite, cancellationToken: cancellationToken);
                         await OnAfterCopy.SafeInvokeAsync(src.Directory, pastedDir, true);
                     }
 
-                    if (pastedDir != null)
-                    {
+                    if (pastedDir != null) {
                         var hash = pastedDir.GetHash(dstPath.Volume, pathParser);
                         pasteResp.added.Add(await pastedDir.ToFileInfoAsync(hash, dstPath.HashedTarget, dstPath.Volume, connector.Options, cancellationToken: cancellationToken));
                     }
-                }
-                else
-                {
+                } else {
                     IFile pastedFile;
                     var file = src.File;
                     var newDest = PathHelper.SafelyCombine(dstPath.Directory.FullName, dstPath.Directory.FullName, file.Name);
                     var newDestFile = new FileSystemFile(newDest, dstPath.Volume);
                     var exists = await newDestFile.ExistsAsync;
 
-                    if (exists && cmd.Renames.Contains(newDestFile.Name))
-                    {
+                    if (exists && cmd.Renames.Contains(newDestFile.Name)) {
                         var fileNameWithoutExt = Path.GetFileNameWithoutExtension(newDestFile.Name);
                         var ext = Path.GetExtension(newDestFile.Name);
                         var backupName = $"{fileNameWithoutExt}{cmd.Suffix}{ext}";
@@ -1253,17 +1082,14 @@ namespace elFinder.Net.Drivers.FileSystem
                         pasteResp.added.Add(await newDestFile.ToFileInfoAsync(dstPath.HashedTarget, newDestFile.Volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
                     }
 
-                    if (isCut)
-                    {
+                    if (isCut) {
                         await RemoveThumbsAsync(src, cancellationToken: cancellationToken);
 
                         pastedFile = await SafeMoveToAsync(file, dstPath.Directory.FullName,
                             dstVolume, dstVolume.CopyOverwrite, cancellationToken: cancellationToken);
 
                         pasteResp.removed.Add(src.HashedTarget);
-                    }
-                    else
-                    {
+                    } else {
                         pastedFile = await SafeCopyToAsync(file, dstPath.Directory.FullName,
                             dstVolume, dstVolume.CopyOverwrite, cancellationToken: cancellationToken);
                     }
@@ -1275,18 +1101,15 @@ namespace elFinder.Net.Drivers.FileSystem
             return pasteResp;
         }
 
-        public virtual async Task<DuplicateResponse> DuplicateAsync(DuplicateCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<DuplicateResponse> DuplicateAsync(DuplicateCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var dupResp = new DuplicateResponse();
 
-            foreach (var src in cmd.TargetPaths)
-            {
+            foreach (var src in cmd.TargetPaths) {
                 var dstVolume = src.Volume;
 
-                if (src.IsDirectory)
-                {
+                if (src.IsDirectory) {
                     var newName = await src.Directory.GetCopyNameAsync(cancellationToken: cancellationToken);
                     var newDest = PathHelper.SafelyCombine(src.Directory.Parent.FullName, src.Directory.Parent.FullName, newName);
 
@@ -1297,9 +1120,7 @@ namespace elFinder.Net.Drivers.FileSystem
                     var hash = dupDir.GetHash(src.Volume, pathParser);
                     var parentHash = dupDir.GetParentHash(src.Volume, pathParser);
                     dupResp.added.Add(await dupDir.ToFileInfoAsync(hash, parentHash, src.Volume, connector.Options, cancellationToken: cancellationToken));
-                }
-                else
-                {
+                } else {
                     var dupFile = await SafeCopyToAsync(src.File, src.File.Parent.FullName, dstVolume,
                         copyOverwrite: false, cancellationToken: cancellationToken);
 
@@ -1311,8 +1132,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return dupResp;
         }
 
-        public virtual async Task<SearchResponse> SearchAsync(SearchCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<SearchResponse> SearchAsync(SearchCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var searchResp = new SearchResponse();
@@ -1321,42 +1141,28 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.Directory.ObjectAttribute.Read) throw new PermissionDeniedException();
 
-            if (!string.IsNullOrWhiteSpace(cmd.Type))
-            {
+            if (!string.IsNullOrWhiteSpace(cmd.Type)) {
                 var method = GetType().GetMethod($"{CustomSearchMethodPrefix}{cmd.Type}",
-                    new Type[] { typeof(SearchCommand), typeof(CancellationToken) });
-
-                if (method == null)
-                {
-                    throw new KeyNotFoundException("Custom search function not found");
-                }
-
-                if (method.ReturnType != typeof(Task<SearchResponse>))
-                {
+                    [typeof(SearchCommand), typeof(CancellationToken)]) ?? throw new KeyNotFoundException("Custom search function not found");
+                if (method.ReturnType != typeof(Task<SearchResponse>)) {
                     throw new InvalidCastException("Invalid return type");
                 }
 
-                Task<SearchResponse> task = method.Invoke(this, new object[] { cmd, cancellationToken }) as Task<SearchResponse>;
 
-                return task != null
+                return method.Invoke(this, [cmd, cancellationToken]) is Task<SearchResponse> task
                     ? await task
                     : throw new InvalidOperationException("Invalid response from custom search function");
-            }
-            else
-            {
+            } else {
                 foreach (var item in await targetPath.Directory.GetFilesAsync(cmd.Q, cmd.Mimes,
-                    searchOption: SearchOption.AllDirectories, cancellationToken: cancellationToken))
-                {
+                    searchOption: SearchOption.AllDirectories, cancellationToken: cancellationToken)) {
                     var parentHash = item.Parent.Equals(targetPath.Directory) ? targetPath.HashedTarget :
                         item.GetParentHash(volume, pathParser);
                     searchResp.files.Add(await item.ToFileInfoAsync(parentHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
                 }
 
-                if (cmd.Mimes.Count == 0)
-                {
+                if (cmd.Mimes.Count == 0) {
                     foreach (var item in await targetPath.Directory.GetDirectoriesAsync(cmd.Q,
-                        searchOption: SearchOption.AllDirectories, cancellationToken: cancellationToken))
-                    {
+                        searchOption: SearchOption.AllDirectories, cancellationToken: cancellationToken)) {
                         var hash = item.GetHash(volume, pathParser);
                         var parentHash = item.Parent.Equals(targetPath.Directory) ? targetPath.HashedTarget :
                             item.GetParentHash(volume, pathParser);
@@ -1368,8 +1174,7 @@ namespace elFinder.Net.Drivers.FileSystem
             }
         }
 
-        public virtual async Task<ArchiveResponse> ArchiveAsync(ArchiveCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ArchiveResponse> ArchiveAsync(ArchiveCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!IsObjectNameValid(cmd.Name))
@@ -1398,32 +1203,24 @@ namespace elFinder.Net.Drivers.FileSystem
             if (newFile.DirectoryExists())
                 throw new ExistsException(newFile.Name);
 
-            try
-            {
+            try {
                 await OnBeforeArchive.SafeInvokeAsync(newFile);
-                using (var fileStream = ZipFile.Open(archivePath, ZipArchiveMode.Update))
-                {
-                    foreach (var path in cmd.TargetPaths)
-                    {
+                using (var fileStream = ZipFile.Open(archivePath, ZipArchiveMode.Update)) {
+                    foreach (var path in cmd.TargetPaths) {
                         if (!path.FileSystem.CanBeArchived()) throw new PermissionDeniedException();
 
-                        if (path.IsDirectory)
-                        {
+                        if (path.IsDirectory) {
                             await zipFileArchiver.AddDirectoryAsync(fileStream, path.Directory,
                                 fromDir: string.Empty, isDownload: false, cancellationToken: cancellationToken);
-                        }
-                        else
-                        {
+                        } else {
                             zipFileArchiver.CreateEntryFromFile(fileStream, path.File, path.File.Name);
                         }
                     }
                 }
                 await OnAfterArchive.SafeInvokeAsync(newFile);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 await OnArchiveError.SafeInvokeAsync(e, newFile);
-                throw e;
+                throw;
             }
 
             await newFile.RefreshAsync(cancellationToken);
@@ -1431,8 +1228,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return archiveResp;
         }
 
-        public virtual async Task<ExtractResponse> ExtractAsync(ExtractCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ExtractResponse> ExtractAsync(ExtractCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var extractResp = new ExtractResponse();
@@ -1446,8 +1242,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetPath.File.CanExtract()) throw new PermissionDeniedException();
 
-            if (makedir)
-            {
+            if (makedir) {
                 fromPath = PathHelper.SafelyCombine(fromPath, fromPath, Path.GetFileNameWithoutExtension(targetPath.File.Name));
                 fromDir = new FileSystemDirectory(fromPath, volume);
 
@@ -1457,8 +1252,7 @@ namespace elFinder.Net.Drivers.FileSystem
                 if (fromDir.FileExists())
                     throw new ExistsException(fromDir.Name);
 
-                if (!await fromDir.ExistsAsync)
-                {
+                if (!await fromDir.ExistsAsync) {
                     await OnBeforeMakeDir.SafeInvokeAsync(fromDir);
                     await fromDir.CreateAsync(cancellationToken: cancellationToken);
                     await OnAfterMakeDir.SafeInvokeAsync(fromDir);
@@ -1470,15 +1264,12 @@ namespace elFinder.Net.Drivers.FileSystem
             }
 
             await OnBeforeExtract.SafeInvokeAsync(parentDir, fromDir, targetPath.File);
-            using (var archive = ZipFile.OpenRead(targetPath.File.FullName))
-            {
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
+            using (var archive = ZipFile.OpenRead(targetPath.File.FullName)) {
+                foreach (ZipArchiveEntry entry in archive.Entries) {
                     string fullName = PathHelper.GetFullPathNormalized(
                         PathHelper.SafelyCombine(fromPath, fromPath, entry.FullName));
 
-                    if (string.IsNullOrEmpty(entry.Name))
-                    {
+                    if (string.IsNullOrEmpty(entry.Name)) {
                         var dir = new FileSystemDirectory(fullName, volume);
                         if (!await dir.CanExtractToAsync(cancellationToken: cancellationToken))
                             throw new PermissionDeniedException();
@@ -1486,22 +1277,18 @@ namespace elFinder.Net.Drivers.FileSystem
                         if (dir.FileExists())
                             throw new ExistsException(dir.Name);
 
-                        if (!await dir.ExistsAsync)
-                        {
+                        if (!await dir.ExistsAsync) {
                             await OnBeforeMakeDir.SafeInvokeAsync(dir);
                             await dir.CreateAsync(cancellationToken: cancellationToken);
                             await OnAfterMakeDir.SafeInvokeAsync(dir);
                         }
 
-                        if (!makedir)
-                        {
+                        if (!makedir) {
                             var parentHash = dir.GetParentHash(volume, pathParser);
                             var hash = dir.GetHash(volume, pathParser);
                             extractResp.added.Add(await dir.ToFileInfoAsync(hash, parentHash, volume, connector.Options, cancellationToken: cancellationToken));
                         }
-                    }
-                    else
-                    {
+                    } else {
                         var file = new FileSystemFile(fullName, volume);
 
                         if (!await file.CanExtractToAsync(cancellationToken: cancellationToken)) throw new PermissionDeniedException();
@@ -1516,8 +1303,7 @@ namespace elFinder.Net.Drivers.FileSystem
                         await zipFileArchiver.ExtractToAsync(entry, file, isOverwrite, cancellationToken: cancellationToken);
                         await OnAfterExtractFile.SafeInvokeAsync(entryModel, file, isOverwrite);
 
-                        if (!makedir)
-                        {
+                        if (!makedir) {
                             await file.RefreshAsync(cancellationToken);
                             var parentHash = file.GetParentHash(volume, pathParser);
                             extractResp.added.Add(await file.ToFileInfoAsync(parentHash, volume, pathParser, pictureEditor, videoEditor, cancellationToken: cancellationToken));
@@ -1531,8 +1317,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return extractResp;
         }
 
-        public virtual async Task<PutResponse> PutAsync(PutCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<PutResponse> PutAsync(PutCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var putResp = new PutResponse();
@@ -1542,53 +1327,37 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetFile.ObjectAttribute.Write) throw new PermissionDeniedException();
 
-            if (cmd.Encoding == "scheme")
-            {
-                if (cmd.Content.StartsWith(WebConsts.UriScheme.Data))
-                {
+            if (cmd.Encoding == "scheme") {
+                if (cmd.Content.StartsWith(WebConsts.UriScheme.Data)) {
                     var data = ParseDataURIScheme(cmd.Content, nameof(ConnectorCommand.Cmd_Put));
 
                     await OnBeforeWriteData.SafeInvokeAsync(data, targetFile);
-                    using (var fileStream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                    {
+                    using (var fileStream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
                         fileStream.Write(data, 0, data.Length);
                     }
                     await OnAfterWriteData.SafeInvokeAsync(data, targetFile);
-                }
-                else
-                {
-                    using (var client = new HttpClient())
-                    {
-                        Func<Task<Stream>> openFunc = async () => await client.GetStreamAsync(cmd.Content);
-                        using (var dataStream = await openFunc())
-                        {
-                            await OnBeforeWriteStream.SafeInvokeAsync(openFunc, targetFile);
-                            using (var fileStream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                            {
-                                await dataStream.CopyToAsync(fileStream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
-                            }
-                            await OnAfterWriteStream.SafeInvokeAsync(openFunc, targetFile);
-                        }
+                } else {
+                    using var client = new HttpClient();
+                    Func<Task<Stream>> openFunc = async () => await client.GetStreamAsync(cmd.Content);
+                    using var dataStream = await openFunc();
+                    await OnBeforeWriteStream.SafeInvokeAsync(openFunc, targetFile);
+                    using (var fileStream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
+                        await dataStream.CopyToAsync(fileStream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
                     }
+                    await OnAfterWriteStream.SafeInvokeAsync(openFunc, targetFile);
                 }
-            }
-            else if (cmd.Encoding == "hash")
-            {
+            } else if (cmd.Encoding == "hash") {
                 Func<Task<Stream>> openStreamFunc = async () => await cmd.ContentPath.File.OpenReadAsync(cancellationToken: cancellationToken);
 
                 await OnBeforeWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
-                using (var readStream = await openStreamFunc())
-                {
+                using (var readStream = await openStreamFunc()) {
                     await targetFile.OverwriteAsync(readStream, cancellationToken: cancellationToken);
                 }
                 await OnAfterWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
-            }
-            else
-            {
+            } else {
                 await OnBeforeWriteContent.SafeInvokeAsync(cmd.Content, cmd.Encoding, targetFile);
                 using (var fileStream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                using (var writer = new StreamWriter(fileStream, Encoding.GetEncoding(cmd.Encoding)))
-                {
+                using (var writer = new StreamWriter(fileStream, Encoding.GetEncoding(cmd.Encoding))) {
                     writer.Write(cmd.Content);
                 }
                 await OnAfterWriteContent.SafeInvokeAsync(cmd.Content, cmd.Encoding, targetFile);
@@ -1601,8 +1370,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return putResp;
         }
 
-        public virtual async Task<ResizeResponse> ResizeAsync(ResizeCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ResizeResponse> ResizeAsync(ResizeCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var resizeResp = new ResizeResponse();
@@ -1612,19 +1380,14 @@ namespace elFinder.Net.Drivers.FileSystem
 
             if (!targetFile.CanEditImage()) throw new PermissionDeniedException();
 
-            switch (cmd.Mode)
-            {
-                case ResizeCommand.Mode_Resize:
-                    {
+            switch (cmd.Mode) {
+                case ResizeCommand.Mode_Resize: {
                         await RemoveThumbsAsync(targetPath, cancellationToken: cancellationToken);
 
-                        Func<Task<ImageWithMimeType>> getImageFunc = async () =>
-                        {
-                            using (var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken))
-                            {
-                                return await pictureEditor
-                                    .ScaleAsync(stream, cmd.Width, cmd.Height, cmd.Quality);
-                            }
+                        Func<Task<ImageWithMimeType>> getImageFunc = async () => {
+                            using var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken);
+                            return await pictureEditor
+                                .ScaleAsync(stream, cmd.Width, cmd.Height, cmd.Quality);
                         };
 
                         Func<Task<Stream>> openStreamFunc = async () => (await getImageFunc()).ImageStream;
@@ -1632,24 +1395,18 @@ namespace elFinder.Net.Drivers.FileSystem
                         ImageWithMimeType image = await getImageFunc();
 
                         await OnBeforeWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
-                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                        {
+                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
                             await image.ImageStream.CopyToAsync(stream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
                         }
                         await OnAfterWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
                     }
                     break;
-                case ResizeCommand.Mode_Crop:
-                    {
+                case ResizeCommand.Mode_Crop: {
                         await RemoveThumbsAsync(targetPath, cancellationToken: cancellationToken);
 
-                        Func<Task<ImageWithMimeType>> getImageFunc = async () =>
-                        {
-                            using (var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken))
-                            {
-                                return await pictureEditor.CropAsync(stream, cmd.X, cmd.Y,
-                                    cmd.Width, cmd.Height, cmd.Quality);
-                            }
+                        Func<Task<ImageWithMimeType>> getImageFunc = async () => {
+                            using var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken);
+                            return await pictureEditor.CropAsync(stream, cmd.X, cmd.Y, cmd.Width, cmd.Height, cmd.Quality);
                         };
 
                         Func<Task<Stream>> openStreamFunc = async () => (await getImageFunc()).ImageStream;
@@ -1657,24 +1414,19 @@ namespace elFinder.Net.Drivers.FileSystem
                         ImageWithMimeType image = await getImageFunc();
 
                         await OnBeforeWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
-                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                        {
+                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
                             await image.ImageStream.CopyToAsync(stream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
                         }
                         await OnAfterWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
                     }
                     break;
-                case ResizeCommand.Mode_Rotate:
-                    {
+                case ResizeCommand.Mode_Rotate: {
                         await RemoveThumbsAsync(targetPath, cancellationToken: cancellationToken);
 
-                        Func<Task<ImageWithMimeType>> getImageFunc = async () =>
-                        {
-                            using (var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken))
-                            {
-                                return await pictureEditor
-                                .RotateAsync(stream, cmd.Degree, cmd.Background, cmd.Quality);
-                            }
+                        Func<Task<ImageWithMimeType>> getImageFunc = async () => {
+                            using var stream = await targetFile.OpenReadAsync(cancellationToken: cancellationToken);
+                            return await pictureEditor
+                            .RotateAsync(stream, cmd.Degree, cmd.Background, cmd.Quality);
                         };
 
                         Func<Task<Stream>> openStreamFunc = async () => (await getImageFunc()).ImageStream;
@@ -1682,8 +1434,7 @@ namespace elFinder.Net.Drivers.FileSystem
                         ImageWithMimeType image = await getImageFunc();
 
                         await OnBeforeWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
-                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken))
-                        {
+                        using (var stream = await targetFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
                             await image.ImageStream.CopyToAsync(stream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
                         }
                         await OnAfterWriteStream.SafeInvokeAsync(openStreamFunc, targetFile);
@@ -1699,8 +1450,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return resizeResp;
         }
 
-        public virtual async Task<Zipdl1stResponse> ZipdlAsync(ZipdlCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<Zipdl1stResponse> ZipdlAsync(ZipdlCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var zipdlData = new ZipdlData();
@@ -1712,45 +1462,34 @@ namespace elFinder.Net.Drivers.FileSystem
                 volume.TempArchiveDirectory, cancellationToken: cancellationToken);
             var newFile = new FileSystemFile(archivePath, volume);
 
-            try
-            {
-                using (var fileStream = ZipFile.Open(archivePath, ZipArchiveMode.Update))
-                {
-                    foreach (var path in cmd.TargetPaths)
-                    {
-                        if (!path.FileSystem.CanDownload())
-                            throw new PermissionDeniedException();
+            try {
+                using var fileStream = ZipFile.Open(archivePath, ZipArchiveMode.Update);
+                foreach (var path in cmd.TargetPaths) {
+                    if (!path.FileSystem.CanDownload())
+                        throw new PermissionDeniedException();
 
-                        if (path.IsDirectory)
-                        {
-                            await zipFileArchiver.AddDirectoryAsync(fileStream, path.Directory,
-                                fromDir: string.Empty, true, path.IsRoot ? volume.Name : null, cancellationToken: cancellationToken);
-                        }
-                        else
-                        {
-                            zipFileArchiver.CreateEntryFromFile(fileStream, path.File, path.File.Name);
-                        }
+                    if (path.IsDirectory) {
+                        await zipFileArchiver.AddDirectoryAsync(fileStream, path.Directory,
+                            fromDir: string.Empty, true, path.IsRoot ? volume.Name : null, cancellationToken: cancellationToken);
+                    } else {
+                        zipFileArchiver.CreateEntryFromFile(fileStream, path.File, path.File.Name);
                     }
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception) {
                 if (File.Exists(archivePath)) File.Delete(archivePath);
-                throw e;
+                throw;
             }
 
             zipdlData.mime = MediaTypeNames.Application.Zip;
             zipdlData.name = DownloadHelper.GetZipDownloadName(cmd.TargetPaths) + zipExt;
             zipdlData.file = archiveFileKey;
 
-            return new Zipdl1stResponse
-            {
+            return new Zipdl1stResponse {
                 zipdl = zipdlData
             };
         }
 
-        public virtual async Task<FileResponse> ZipdlRawAsync(ZipdlCommand cmd, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<FileResponse> ZipdlRawAsync(ZipdlCommand cmd, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!IsObjectNameValid(cmd.DownloadFileName))
@@ -1764,37 +1503,32 @@ namespace elFinder.Net.Drivers.FileSystem
             if (!tempFileInfo.Exists) throw new PermissionDeniedException($"Malformed key");
 
             var memStream = new MemoryStream();
-            using (var fileStream = tempFileInfo.OpenRead())
-            {
+            using (var fileStream = tempFileInfo.OpenRead()) {
                 await fileStream.CopyToAsync(memStream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
             }
             tempFileInfo.Delete();
             memStream.Position = 0;
 
-            return new FileResponse
-            {
+            return new FileResponse {
                 ContentType = cmd.MimeType,
                 FileStream = memStream,
                 FileDownloadName = cmd.DownloadFileName
             };
         }
 
-        public virtual async Task<ImageWithMimeType> GetThumbAsync(PathInfo target, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<ImageWithMimeType> GetThumbAsync(PathInfo target, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (target.IsDirectory) return null;
 
             var (thumb, thumbFile, mediaType) = await CreateThumbAsync(target.File, cancellationToken: cancellationToken);
 
-            if (thumb != null)
-            {
+            if (thumb != null) {
                 thumb.ImageStream.Position = 0;
                 return thumb;
             }
 
-            if (thumbFile == null || !await thumbFile.ExistsAsync)
-            {
+            if (thumbFile == null || !await thumbFile.ExistsAsync) {
                 thumbnailBackgroundGenerator.TryAddToQueue(target.File, thumbFile, target.File.Volume.ThumbnailSize, true, mediaType);
                 return null;
             }
@@ -1803,8 +1537,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return new ImageWithMimeType(mimeType, await thumbFile.OpenReadAsync(cancellationToken: cancellationToken));
         }
 
-        public virtual async Task<string> GenerateThumbPathAsync(IFile file, CancellationToken cancellationToken = default)
-        {
+        public virtual async Task<string> GenerateThumbPathAsync(IFile file, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var volume = file.Volume;
@@ -1826,8 +1559,7 @@ namespace elFinder.Net.Drivers.FileSystem
             return $"{thumbDir}{volumeSeparator}{thumbName}";
         }
 
-        public virtual Task<string> GenerateThumbPathAsync(IDirectory directory, CancellationToken cancellationToken = default)
-        {
+        public virtual Task<string> GenerateThumbPathAsync(IDirectory directory, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var volume = directory.Volume;
@@ -1847,8 +1579,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         public async Task<(ImageWithMimeType Thumb, IFile ThumbFile, MediaType? MediaType)> CreateThumbAsync(IFile file,
-            bool verify = true, CancellationToken cancellationToken = default)
-        {
+            bool verify = true, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             MediaType? mediaType = file.CanGetThumb(pictureEditor, videoEditor, verify);
@@ -1862,19 +1593,13 @@ namespace elFinder.Net.Drivers.FileSystem
             var volume = file.Volume;
             var thumbFile = volume.Driver.CreateFile(thumbPath, volume);
 
-            if (!await thumbFile.ExistsAsync)
-            {
-                if (mediaType == MediaType.Image)
-                {
-                    var thumb = await thumbFile.CreateThumbAsync(
-                        file, volume.ThumbnailSize, pictureEditor, cancellationToken: cancellationToken);
+            if (!await thumbFile.ExistsAsync) {
+                if (mediaType == MediaType.Image) {
+                    var thumb = await thumbFile.CreateThumbAsync(file, volume.ThumbnailSize, pictureEditor, cancellationToken: cancellationToken);
 
                     return (thumb, thumbFile, mediaType);
-                }
-                else if (mediaType == MediaType.Video)
-                {
-                    var thumb = await thumbFile.CreateThumbAsync(
-                        file, volume.ThumbnailSize, videoEditor, cancellationToken: cancellationToken);
+                } else if (mediaType == MediaType.Video) {
+                    var thumb = await thumbFile.CreateThumbAsync(file, volume.ThumbnailSize, videoEditor, cancellationToken: cancellationToken);
 
                     return (thumb, thumbFile, mediaType);
                 }
@@ -1883,26 +1608,20 @@ namespace elFinder.Net.Drivers.FileSystem
             return (null, thumbFile, mediaType);
         }
 
-        public IFile CreateFile(string fullPath, IVolume volume)
-        {
+        public IFile CreateFile(string fullPath, IVolume volume) {
             return new FileSystemFile(fullPath, volume);
         }
 
-        public IDirectory CreateDirectory(string fullPath, IVolume volume)
-        {
+        public IDirectory CreateDirectory(string fullPath, IVolume volume) {
             return new FileSystemDirectory(fullPath, volume);
         }
 
         // Or use Path.GetFileName(name) to remove all paths and keep the fileName only.
-        protected bool IsObjectNameValid(string name)
-        {
-            return name == null || !name.Any(ch => InvalidFileNameChars.Contains(ch));
-        }
+        protected static bool IsObjectNameValid(string name) => name == null || !name.Any(static ch => InvalidFileNameChars.Contains(ch));
 
         protected virtual async Task<IFile> SafeCopyToAsync(IFile file, string newDir,
             IVolume destVolume, bool copyOverwrite = true, string suffix = null,
-            CancellationToken cancellationToken = default)
-        {
+            CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!file.CanCopy()) throw new PermissionDeniedException();
@@ -1911,10 +1630,8 @@ namespace elFinder.Net.Drivers.FileSystem
             IFile newFile = new FileSystemFile(newPath, destVolume);
             var isOverwrite = true;
 
-            if (File.Exists(newPath))
-            {
-                if (!copyOverwrite)
-                {
+            if (File.Exists(newPath)) {
+                if (!copyOverwrite) {
                     var newName = await newFile.GetCopyNameAsync(suffix, cancellationToken: cancellationToken);
                     newPath = PathHelper.SafelyCombine(newDir, newDir, newName);
                     isOverwrite = false;
@@ -1930,8 +1647,7 @@ namespace elFinder.Net.Drivers.FileSystem
 
         protected virtual async Task<IFile> SafeMoveToAsync(IFile file, string newDir,
             IVolume destVolume, bool copyOverwrite = true, string suffix = null,
-            CancellationToken cancellationToken = default)
-        {
+            CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!file.CanMove()) throw new PermissionDeniedException();
@@ -1939,15 +1655,11 @@ namespace elFinder.Net.Drivers.FileSystem
             string newPath = PathHelper.SafelyCombine(newDir, newDir, file.Name);
             IFile newFile = new FileSystemFile(newPath, destVolume);
 
-            if (await newFile.ExistsAsync)
-            {
-                if (!copyOverwrite)
-                {
+            if (await newFile.ExistsAsync) {
+                if (!copyOverwrite) {
                     var newName = await newFile.GetCopyNameAsync(suffix, cancellationToken: cancellationToken);
                     newPath = PathHelper.SafelyCombine(newDir, newDir, newName);
-                }
-                else
-                {
+                } else {
                     await OnBeforeMove.SafeInvokeAsync(file, newPath, true);
 
                     await OnBeforeCopy.SafeInvokeAsync(file, newPath, true);
@@ -1972,8 +1684,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         protected virtual async Task<IDirectory> CopyToAsync(IDirectory directory, string newDest,
-            IVolume destVolume, bool copyOverwrite, string suffix = null, CancellationToken cancellationToken = default)
-        {
+            IVolume destVolume, bool copyOverwrite, string suffix = null, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (!directory.CanCopy()) throw new PermissionDeniedException();
@@ -1988,28 +1699,24 @@ namespace elFinder.Net.Drivers.FileSystem
             var queue = new Queue<(IDirectory Dir, IDirectory Dest)>();
             queue.Enqueue((directory, destInfo));
 
-            while (queue.Count > 0)
-            {
-                var currentItem = queue.Dequeue();
-                var currentDir = currentItem.Dir;
-                var currentNewDest = currentItem.Dest;
+            while (queue.Count > 0) {
+                var (Dir, Dest) = queue.Dequeue();
+                var currentDir = Dir;
+                var currentNewDest = Dest;
 
-                if (!await currentNewDest.ExistsAsync)
-                {
+                if (!await currentNewDest.ExistsAsync) {
                     await OnBeforeMakeDir.SafeInvokeAsync(currentNewDest);
                     await currentNewDest.CreateAsync(cancellationToken: cancellationToken);
                     await OnAfterMakeDir.SafeInvokeAsync(currentNewDest);
                 }
 
-                foreach (var dir in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken))
-                {
+                foreach (var dir in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken)) {
                     var newDir = new FileSystemDirectory(PathHelper.SafelyCombine(
                         currentNewDest.FullName, currentNewDest.FullName, dir.Name), currentNewDest.Volume);
                     queue.Enqueue((dir, newDir));
                 }
 
-                foreach (var file in await currentDir.GetFilesAsync(cancellationToken: cancellationToken))
-                {
+                foreach (var file in await currentDir.GetFilesAsync(cancellationToken: cancellationToken)) {
                     await SafeCopyToAsync(file, currentNewDest.FullName, destVolume, copyOverwrite, suffix, cancellationToken: cancellationToken);
                 }
             }
@@ -2019,8 +1726,7 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         protected virtual async Task<IDirectory> MergeAsync(IDirectory srcDir, string newDest,
-            IVolume destVolume, bool copyOverwrite, string suffix = null, CancellationToken cancellationToken = default)
-        {
+            IVolume destVolume, bool copyOverwrite, string suffix = null, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var destInfo = new FileSystemDirectory(newDest, destVolume);
@@ -2033,28 +1739,24 @@ namespace elFinder.Net.Drivers.FileSystem
             var queue = new Queue<(IDirectory Dir, IDirectory Dest)>();
             queue.Enqueue((srcDir, destInfo));
 
-            while (queue.Count > 0)
-            {
-                var currentItem = queue.Dequeue();
-                var currentDir = currentItem.Dir;
-                var currentNewDest = currentItem.Dest;
+            while (queue.Count > 0) {
+                var (Dir, Dest) = queue.Dequeue();
+                var currentDir = Dir;
+                var currentNewDest = Dest;
 
-                if (!await currentNewDest.ExistsAsync)
-                {
+                if (!await currentNewDest.ExistsAsync) {
                     await OnBeforeMakeDir.SafeInvokeAsync(currentNewDest);
                     await currentNewDest.CreateAsync(cancellationToken: cancellationToken);
                     await OnAfterMakeDir.SafeInvokeAsync(currentNewDest);
                 }
 
-                foreach (var dir in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken))
-                {
+                foreach (var dir in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken)) {
                     var newDir = new FileSystemDirectory(PathHelper.SafelyCombine(
                         currentNewDest.FullName, currentNewDest.FullName, dir.Name), currentNewDest.Volume);
                     queue.Enqueue((dir, newDir));
                 }
 
-                foreach (var file in await currentDir.GetFilesAsync(cancellationToken: cancellationToken))
-                {
+                foreach (var file in await currentDir.GetFilesAsync(cancellationToken: cancellationToken)) {
                     await SafeMoveToAsync(file, currentNewDest.FullName, destVolume, copyOverwrite, suffix, cancellationToken: cancellationToken);
                 }
             }
@@ -2063,23 +1765,20 @@ namespace elFinder.Net.Drivers.FileSystem
             return destInfo;
         }
 
-        protected virtual async Task AddParentsToListAsync(PathInfo pathInfo, List<object> list, CancellationToken cancellationToken = default)
-        {
+        protected virtual async Task AddParentsToListAsync(PathInfo pathInfo, List<object> list, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var currentDir = pathInfo.Directory;
             var volume = pathInfo.Volume;
             string lastParentHash = null;
 
-            do
-            {
+            do {
                 currentDir = currentDir.Parent;
 
                 var hash = lastParentHash ?? currentDir.GetHash(volume, pathParser);
                 lastParentHash = currentDir.GetParentHash(volume, pathParser);
 
-                foreach (var item in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken))
-                {
+                foreach (var item in await currentDir.GetDirectoriesAsync(cancellationToken: cancellationToken)) {
                     var subHash = item.GetHash(volume, pathParser);
                     list.Add(await item.ToFileInfoAsync(subHash, hash, volume, connector.Options, cancellationToken: cancellationToken));
                 }
@@ -2087,39 +1786,29 @@ namespace elFinder.Net.Drivers.FileSystem
             while (!volume.IsRoot(currentDir));
         }
 
-        protected virtual async Task RemoveThumbsAsync(PathInfo path, CancellationToken cancellationToken = default)
-        {
+        protected virtual async Task RemoveThumbsAsync(PathInfo path, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
+            try {
                 await OnBeforeRemoveThumb.SafeInvokeAsync(path);
-                if (path.IsDirectory)
-                {
+                if (path.IsDirectory) {
                     string thumbPath = await GenerateThumbPathAsync(path.Directory, cancellationToken: cancellationToken);
-                    if (!string.IsNullOrEmpty(thumbPath) && Directory.Exists(thumbPath))
-                    {
+                    if (!string.IsNullOrEmpty(thumbPath) && Directory.Exists(thumbPath)) {
                         Directory.Delete(thumbPath, true);
                     }
-                }
-                else
-                {
+                } else {
                     string thumbPath = await GenerateThumbPathAsync(path.File, cancellationToken: cancellationToken);
-                    if (!string.IsNullOrEmpty(thumbPath) && File.Exists(thumbPath))
-                    {
+                    if (!string.IsNullOrEmpty(thumbPath) && File.Exists(thumbPath)) {
                         File.Delete(thumbPath);
                     }
                 }
                 await OnAfterRemoveThumb.SafeInvokeAsync(path);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 await OnRemoveThumbError.SafeInvokeAsync(ex);
             }
         }
 
-        protected virtual async Task<string> GetInlineContentAsync(IFile file, StreamReader reader, CancellationToken cancellationToken = default)
-        {
+        protected virtual async Task<string> GetInlineContentAsync(IFile file, StreamReader reader, CancellationToken cancellationToken = default) {
             cancellationToken.ThrowIfCancellationRequested();
 
             var mime = MimeHelper.GetMimeType(file.Extension);
@@ -2127,17 +1816,14 @@ namespace elFinder.Net.Drivers.FileSystem
             if (mime.Type == ContentTypeNames.Text.Type)
                 return reader.ReadToEnd();
 
-            using (var memStream = new MemoryStream())
-            {
-                await reader.BaseStream.CopyToAsync(memStream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
-                var base64Str = Convert.ToBase64String(memStream.ToArray());
-                var dataUri = $"data:{mime};charset={reader.CurrentEncoding.WebName};base64,{base64Str}";
-                return dataUri;
-            }
+            using var memStream = new MemoryStream();
+            await reader.BaseStream.CopyToAsync(memStream, StreamConstants.DefaultBufferSize, cancellationToken: cancellationToken);
+            var base64Str = Convert.ToBase64String(memStream.ToArray());
+            var dataUri = $"data:{mime};charset={reader.CurrentEncoding.WebName};base64,{base64Str}";
+            return dataUri;
         }
 
-        protected virtual byte[] ParseDataURIScheme(string dataUri, string fromcmd)
-        {
+        protected virtual byte[] ParseDataURIScheme(string dataUri, string fromcmd) {
             var parts = dataUri.Split(',');
             if (parts.Length != 2)
                 throw new CommandParamsException(fromcmd);
@@ -2146,25 +1832,21 @@ namespace elFinder.Net.Drivers.FileSystem
         }
 
         protected virtual async Task MergeChunksAsync(IFile destFile, IDirectory chunkingDir,
-            bool isOverwrite, CancellationToken cancellationToken = default)
-        {
+            bool isOverwrite, CancellationToken cancellationToken = default) {
             var files = (await chunkingDir.GetFilesAsync(cancellationToken: cancellationToken))
                 .Where(f => f.Name != tempFileCleaner.Options.StatusFile)
                 .OrderBy(f => FileHelper.GetChunkInfo(f.Name).CurrentChunkNo).ToArray();
 
-            using (var fileStream = await destFile.OpenWriteAsync(cancellationToken: cancellationToken))
-            {
-                foreach (var file in files)
-                {
+            using (var fileStream = await destFile.OpenWriteAsync(cancellationToken: cancellationToken)) {
+                foreach (var file in files) {
                     await WriteStatusFileAsync(chunkingDir);
 
                     await OnBeforeChunkTransfer.SafeInvokeAsync(file, destFile, isOverwrite);
                     using (var readStream = await file.OpenReadAsync(cancellationToken: cancellationToken))
-                    using (var memStream = new MemoryStream())
-                    {
-                        await readStream.CopyToAsync(memStream);
+                    using (var memStream = new MemoryStream()) {
+                        await readStream.CopyToAsync(memStream, cancellationToken);
                         var bytes = memStream.ToArray();
-                        await fileStream.WriteAsync(bytes, 0, bytes.Length);
+                        await fileStream.WriteAsync(bytes, cancellationToken);
                     }
                     await OnAfterChunkTransfer.SafeInvokeAsync(file, destFile, isOverwrite);
 
@@ -2179,31 +1861,25 @@ namespace elFinder.Net.Drivers.FileSystem
             await OnAfterRemove.SafeInvokeAsync(chunkingDir);
         }
 
-        private string GetChunkDirectory(IDirectory uploadDir, string uploadingFileName, string cid)
-        {
+        private string GetChunkDirectory(IDirectory uploadDir, string uploadingFileName, string cid) {
             var bytes = Encoding.UTF8.GetBytes(uploadDir.FullName + uploadingFileName + cid);
-            var signature = BitConverter.ToString(cryptographyProvider.HMACSHA1ComputeHash(
-                nameof(GetChunkDirectory), bytes)).Replace("-", string.Empty);
+            var signature = Convert.ToHexString(cryptographyProvider.HMACSHA1ComputeHash(
+                nameof(GetChunkDirectory), bytes));
             var tempFileName = $"{ChunkingFolderPrefix}_{signature}";
             var tempDest = PathHelper.SafelyCombine(uploadDir.Volume.ChunkDirectory, uploadDir.Volume.ChunkDirectory, tempFileName);
             return tempDest;
         }
 
-        private async Task WriteStatusFileAsync(IDirectory directory)
-        {
-            try
-            {
-                if (await directory.ExistsAsync)
-                {
+        private async Task WriteStatusFileAsync(IDirectory directory) {
+            try {
+                if (await directory.ExistsAsync) {
                     var statusFile = PathHelper.SafelyCombine(directory.FullName, directory.FullName, tempFileCleaner.Options.StatusFile);
-                    using (var file = File.OpenWrite(statusFile)) { }
+                    using var file = File.OpenWrite(statusFile);
                 }
-            }
-            catch (Exception) { }
+            } catch (Exception) { }
         }
 
-        class ChunkedUploadInfo : ConnectorLock
-        {
+        class ChunkedUploadInfo : ConnectorLock {
             public Exception Exception { get; set; }
             public int TotalUploaded { get; set; }
             public bool IsFileTouched { get; set; }
